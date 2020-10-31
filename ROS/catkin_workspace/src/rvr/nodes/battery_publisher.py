@@ -27,18 +27,23 @@ import traceback
 
 import tf
 import rospy
-from geometry_msgs.msg import PoseWithCovariance
-from geometry_msgs.msg import Pose
-from geometry_msgs.msg import TwistWithCovariance
-from geometry_msgs.msg import Twist
-from geometry_msgs.msg import Point
-from geometry_msgs.msg import Quaternion
-from geometry_msgs.msg import Vector3
-from nav_msgs.msg import Odometry
-from std_msgs.msg import Header
+import time # for ROS message header timestamp
+import math # for NaN values (Not a Number)
+# we need a data type to publish the voltage
+from std_msgs.msg import Header, Float32
+# ros default battery messages
+from sensor_msgs.msg import BatteryState
 
 
-MAX_SENSOR_VALUE = 2**31
+# initialise the node
+rospy.init_node('battery_publisher')
+
+# name of topic is 'voltage'
+pubBattery = rospy.Publisher('voltage', BatteryState, queue_size=1)
+
+# sleep time for this node in seconds
+sleepTime = 1
+
 
 loop = asyncio.get_event_loop()
 
