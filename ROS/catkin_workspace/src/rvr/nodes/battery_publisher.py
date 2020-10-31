@@ -44,6 +44,18 @@ pubBattery = rospy.Publisher('voltage', BatteryState, queue_size=1)
 # sleep time for this node in seconds
 sleepTime = 1
 
+# for reading the voltages
+voltage = 0.0
+value = 0
+demoVoltage = 11.11
+
+
+""" ROS message header """
+# define battery message
+battery_msg = BatteryState()
+frame_id = 'battery'
+seq = 0
+
 
 loop = asyncio.get_event_loop()
 
@@ -55,40 +67,13 @@ rvr = SpheroRvrAsync(
 )
 
 
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 
 
 num_msgs_received = {}
 
-position = Point()
-orientation = Quaternion()
-pose = Pose(
-    position=position,
-    orientation=orientation,
-)
-pose_with_covariance = PoseWithCovariance(
-    pose=pose,
-)
 
-linear = Vector3()
-angular = Vector3()
-twist = Twist(
-    linear=linear,
-    angular=angular,
-)
-twist_with_covariance = TwistWithCovariance(
-    twist=twist,
-)
-odom = Odometry(
-    pose=pose_with_covariance,
-    twist=twist_with_covariance,
-    header=Header(
-        frame_id='/odom',
-    ),
-    child_frame_id='/base_link'
-)
-
-pub_odom = None
+# broadcast message
 br = None
 
 received_components = set()
