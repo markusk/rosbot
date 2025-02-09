@@ -2,71 +2,23 @@
 # coding=utf-8
 
 
-""" Reads the battery voltage and state of the Sphero RVR """
+""" Some first GPIO stuff with the Raspberry Pi """
 
+import RPi.GPIO as GPIO
+import time
 
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/')))
+PIN = 18  # Wähle eine GPIO-Nummer
 
-import asyncio
-from sphero_sdk import SpheroRvrAsync
-from sphero_sdk import SerialAsyncDal
-from sphero_sdk import BatteryVoltageStatesEnum as VoltageStates
+print("Wake up Raspi...")
 
-# for converting JSON to Python
-import json
+GPIO.setmode(GPIO.BCM)  # Verwende BCM-Nummerierung
+GPIO.setup(PIN, GPIO.OUT)  # Setze den Pin als Ausgang
 
-loop = asyncio.get_event_loop()
-
-rvr = SpheroRvrAsync(
-    dal=SerialAsyncDal(
-        loop
-    )
-)
-
-
-async def main():
-    print("Wake up RVR...")
-    await rvr.wake()
-
-    # Give RVR time to wake up
-    await asyncio.sleep(2)
-
-    battery_percentage = await rvr.get_battery_percentage()
-    #print('Battery percentage: ', battery_percentage)
-    # the result is a Python dictionary
-    print("The battery has {0:2d} % left.".format(battery_percentage["percentage"]))
-
-    battery_voltage_state = await rvr.get_battery_voltage_state()
-    # print('Voltage state: ', battery_voltage_state)
-    print("The battery voltage state is {0:1d}.".format(battery_voltage_state["state"]))
-
-    # the battery states
-    state_info = '[{}, {}, {}, {}]'.format(
-        '{}: {}'.format(VoltageStates.unknown.name, VoltageStates.unknown.value),
-        '{}: {}'.format(VoltageStates.ok.name, VoltageStates.ok.value),
-        '{}: {}'.format(VoltageStates.low.name, VoltageStates.low.value),
-        '{}: {}'.format(VoltageStates.critical.name, VoltageStates.critical.value)
-    )
-    print('\nVoltage states: ', state_info)
-
-    await rvr.close()
-
-
-if __name__ == '__main__':
-    try:
-        loop.run_until_complete(
-            main()
-        )
-
-    except KeyboardInterrupt:
-        print('\nProgram terminated with keyboard interrupt.')
-
-        loop.run_until_complete(
-            rvr.close()
-        )
-
-    finally:
-        if loop.is_running():
-            loop.close()
+try:
+    while True:
+        GPIO.output(PIN, GPIO.HIGH)  # Pin auf HIGH setzen
+        time.sleep(1)  # 1 Sekunde warten
+        GPIO.output(PIN, GPIO.LOW)  # Pin auf LOW setzen
+        time.sleep(1)  # 1 Sekunde warten
+except KeyboardInterrupt:
+    GPIO.cleanup()  # GPIOs sauber freigeben
