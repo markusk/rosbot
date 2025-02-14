@@ -11,7 +11,7 @@ MotorA1In3 = 4     # GPIO
 MotorA1In4 = 27    # GPIO
 
 
-pi = pigpio.pi()  # Verbindung zum pigpio-Daemon
+pi = pigpio.pi()  # connect to pigpio daemon
 print("Connecting to Raspi...")
 if not pi.connected:
     exit()
@@ -19,17 +19,20 @@ if not pi.connected:
 
 try:
     while True:
-        # Motor ON
+        # Motor RIGHT
+        print("Motors RIGHT")
         pi.write(MotorA1In3, 1)
-        pi.write(MotorA1In4, 1)
-        time.sleep(1)  # 1 Sekunde warten
-
-        # Motor OFF
-        pi.write(MotorA1In3, 0)
         pi.write(MotorA1In4, 0)
-        time.sleep(1)  # 1 Sekunde warten
+        time.sleep(1)
+
+        # Motor LEFT
+        print("Motors LEFT")
+        pi.write(MotorA1In3, 0)
+        pi.write(MotorA1In4, 1)
+        time.sleep(1)
 except KeyboardInterrupt:
     # Motor OFF
+    print("Motors OFF")
     pi.write(MotorA1In3, 0)
     pi.write(MotorA1In4, 0)
-    pi.stop()  # Verbindung schließen
+    pi.stop()  # close connection
