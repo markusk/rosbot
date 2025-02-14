@@ -4,31 +4,32 @@
 
 """ Some first GPIO stuff with the Raspberry Pi """
 
-import RPi.GPIO as GPIO
+import pigpio
 import time
 
 MotorA1In3 = 4     # GPIO
 MotorA1In4 = 27    # GPIO
 
-print("Wake up Raspi...")
 
-GPIO.setmode(GPIO.BCM)  # Use BCM numbering (GPIO-Numbers instead of Pin-Numbers on the PCB)
-GPIO.setup(MotorA1In3, GPIO.OUT)  # Setze den Pin als Ausgang
-GPIO.setup(MotorA1In4, GPIO.OUT)  # Setze den Pin als Ausgang
+pi = pigpio.pi()  # Verbindung zum pigpio-Daemon
+print("Connecting to Raspi...")
+if not pi.connected:
+    exit()
+
 
 try:
     while True:
         # Motor ON
-        GPIO.output(MotorA1In3, GPIO.HIGH)
-        GPIO.output(MotorA1In4, GPIO.HIGH)
+        pi.write(MotorA1In3, 1)
+        pi.write(MotorA1In4, 1)
         time.sleep(1)  # 1 Sekunde warten
 
         # Motor OFF
-        GPIO.output(MotorA1In3, GPIO.LOW)
-        GPIO.output(MotorA1In4, GPIO.LOW)
+        pi.write(MotorA1In3, 0)
+        pi.write(MotorA1In4, 0)
         time.sleep(1)  # 1 Sekunde warten
 except KeyboardInterrupt:
     # Motor OFF
-    GPIO.output(MotorA1In3, GPIO.LOW)
-    GPIO.output(MotorA1In4, GPIO.LOW)
-    GPIO.cleanup()  # GPIOs sauber freigeben
+    pi.write(MotorA1In3, 0)
+    pi.write(MotorA1In4, 0)
+    pi.stop()  # Verbindung schließen
