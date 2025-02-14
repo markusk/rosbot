@@ -4,21 +4,24 @@
 
 """ Some first GPIO stuff with the Raspberry Pi """
 
-import RPi.GPIO as GPIO
+import pigpio
 import time
+
 
 PIN = 18  # Wähle eine GPIO-Nummer
 
-print("Wake up Raspi...")
+pi = pigpio.pi()  # Verbindung zum pigpio-Daemon
 
-GPIO.setmode(GPIO.BCM)  # Verwende BCM-Nummerierung
-GPIO.setup(PIN, GPIO.OUT)  # Setze den Pin als Ausgang
+
+print("Connecting to Raspi...")
+if not pi.connected:
+    exit()
 
 try:
     while True:
-        GPIO.output(PIN, GPIO.HIGH)  # Pin auf HIGH setzen
-        time.sleep(1)  # 1 Sekunde warten
-        GPIO.output(PIN, GPIO.LOW)  # Pin auf LOW setzen
-        time.sleep(1)  # 1 Sekunde warten
+        pi.write(PIN, 1)  # HIGH setzen
+        time.sleep(1)
+        pi.write(PIN, 0)  # LOW setzen
+        time.sleep(1)
 except KeyboardInterrupt:
-    GPIO.cleanup()  # GPIOs sauber freigeben
+    pi.stop()  # Verbindung schließen
