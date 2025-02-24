@@ -27,6 +27,22 @@ https://github.com/markusk/rosbot
 git cloe https://github.com/markusk/rosbot.git
 ```
 
+## Step 2: Setting up pigpiod for autostart
+
+### systemd under Ubuntu
+
+```bash
+sudo cp raspi/etc__init.d__pigpiod-boot /etc/init.d/pigpiod-boot
+sudo systemctl daemon-reload
+sudo systemctl enable pigpiod-boot
+sudo systemctl start pigpiod-boot
+```
+
+
+
+
+
+
 
 Choose:
 
@@ -111,50 +127,6 @@ catkin_make
 ```
 
 ## Step 6: Setup Sphero Public SDK
-
-### Long version
-
-- Setup SDK with method 2: [Instructions](https://sdk.sphero.com/docs/getting_started/raspberry_pi/raspberry_pi_setup/#using-git)
-
-### Short version
-
-- _Without_ [pipenv](https://github.com/pypa/pipenv):
-
-```bash
-pip3 install aiohttp pyserial_asyncio
-cd ~/develop
-git clone https://github.com/sphero-inc/sphero-sdk-raspberrypi-python
-```
-
-### Make the Sphero Public SDK accessible for the RVR ROS package
-
-- Create symbolic link, pointing to the 'sphero_sdk' folder:
-
-```bash
-ln -s ~/develop/sphero-sdk-raspberrypi-python/sphero_sdk/ ~/develop/rvr/ROS/catkin_workspace/src/rvr/lib/
-```
-
-#### Turn on the RVR and test the SDK
-
-- Start the ROS test program:
-
-```bash
-cd ~/catkin_ws/src/rvr/nodes
-./test.py
-```
-
-- The output should look something like this:
-
-```bash
-Checking RVR firmware versions...
-Checking CMS firmware versions...
-Firmware check complete.
-Battery percentage:  90 %
-Voltage state:  1
-Voltage states:  [unknown: 0, ok: 1, low: 2, critical: 3]
-```
-
-_Note: The firmware check seems to pop up from time to time._
 
 ## Step 7: Run ROS
 
