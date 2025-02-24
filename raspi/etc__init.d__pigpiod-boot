@@ -1,16 +1,16 @@
 #!/bin/sh
 
 ### BEGIN INIT INFO
-# Provides:          minibot-boot
+# Provides:          rosbot-boot
 # Required-Start:    $local_fs $syslog
 # Required-Stop:     $local_fs $syslog
 # Default-Start:     S
 # Default-Stop:
-# Short-Description: Shows a boot text on the minibot OLED.
+# Short-Description: Starts the needed pigpiod daemon to use pigpio.
 # Description:       It runs in rcS.d, when the computer is booting.
 ### END INIT INFO
 
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
+PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 
 # This script runs when booting Ubuntu.
 # see link in /etc/rcS.d/K99...
@@ -18,9 +18,9 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 # Source: http://ccm.net/faq/3348-execute-a-script-at-startup-and-shutdown-on-ubuntu
 # and https://wiki.ubuntuusers.de/SysVinit/
 
-echo "Starting minibot boot script."
+echo "Starting pigpio daemon."
 
-# show a text on the minibot OLED
-/home/pi/minibot/test/lcd_text.py "Booting" "..."
+# starting pigpiod
+/usr/local/bin/pigpiod
 
 exit 0

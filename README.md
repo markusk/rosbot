@@ -1,32 +1,32 @@
 # rvr
 
-A ROS Python package for the Sphero RVR - used on a Raspberry Pi.
+A ROS Python package for my rosbot - running on a Raspberry Pi.
 
 _Please note: this code is still in the middle of the development process!_
 
-[![GitHub issues](https://img.shields.io/github/issues/markusk/rvr)](https://github.com/markusk/rvr/issues) [![GitHub stars](https://img.shields.io/github/stars/markusk/rvr)](https://github.com/markusk/rvr/stargazers) [![GitHub license](https://img.shields.io/github/license/markusk/rvr)](https://github.com/markusk/rvr/blob/master/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/markusk/rosbot)](https://github.com/markusk/rosbot/issues) [![GitHub stars](https://img.shields.io/github/stars/markusk/rosbot)](https://github.com/markusk/rosbot/stargazers) [![GitHub license](https://img.shields.io/github/license/markusk/rosbot)](https://github.com/markusk/rosbot/blob/master/LICENSE)
 
 ---
 
-## Step 1: Setup Raspberry Pi OS
+## Step 1: Setup Raspberry with Ubuntu
 
-- Install Raspberry Pi OS (fka Rasbpian) on your Raspberry Pi ([Instruction](https://www.raspberrypi.org/downloads/raspberry-pi-os/)).
+- Install Ubuntu Desktop ([Instruction](https://ubuntu.com/desktop/)).
+
+
+### Download and install pigpio
+https://abyz.me.uk/rpi/pigpio/download.html
+
+(will be installed to /usr/local/lib and /usr/local/bin)
+
+
+
+### clone this repository
+https://github.com/markusk/rosbot
 
 ```bash
-sudo ssh-keygen -A
+git cloe https://github.com/markusk/rosbot.git
 ```
 
-- Start ssh:
-
-```bash
-sudo systemctl restart ssh.service
-```
-
-### Setup the Raspbery Pi serial port
-
-```bash
-sudo raspi-config
-```
 
 Choose:
 
