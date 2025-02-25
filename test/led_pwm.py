@@ -6,26 +6,26 @@
 import pigpio
 import time
 
-LED_PIN = 18  # GPIO Pin für die LED
+LED_PIN = 18  # GPIO Pin for LED
 
-pi = pigpio.pi()  # Verbindung zum pigpio Daemon herstellen
+pi = pigpio.pi()  # Connecting to pigpio daemon
 print("Connecting to Raspi...")
 if not pi.connected:
     exit()
 
 try:
     while True:
-        # LED Helligkeit erhöhen
+        # increase LED brightness
         for duty_cycle in range(0, 256):
             pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
-            time.sleep(0.01)
+            time.sleep(0.001)
         
-        # LED Helligkeit verringern
+        # decrease LED brightness
         for duty_cycle in range(255, -1, -1):
             pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
-            time.sleep(0.01)
+            time.sleep(0.001)
 except KeyboardInterrupt:
-    # LED ausschalten
+    # turn off LED
     print("Turning off LED")
     pi.set_PWM_dutycycle(LED_PIN, 0)
-    pi.stop()  # Verbindung schließen
+    pi.stop()  # closeing connection
