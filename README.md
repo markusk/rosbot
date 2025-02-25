@@ -50,12 +50,12 @@ jstest --normal /dev/input/js0
 
 ## Step 3: ROS 2
 
-- Install ROS  on your Raspberry Pi ([Instruction](https://varhowto.com/install-ros-noetic-raspberry-pi-4/)):
+- Install ROS  on your Raspberry Pi ([Instruction](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html)):
 
-- Install ROS packages (+++ TO BE CHECKED !!! +++):
+- Install ROS packages (+++ TO BE DEFINED !!! +++):
 
 ```bash
-sudo apt-get install ros-melodic-urg-node ros-melodic-teleop-twist-keyboard joystick ros-melodic-joystick-drivers ros-melodic-teleop-twist-joy
+lorep ipsum
 ```
 
 ## Step 5: Create a central place for this repository
