@@ -1,0 +1,14 @@
+[Unit]
+Description=Startet den pigpio-Daemon für den Rosbot
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/pigpiod -g
+ExecStop=/bin/killall pigpiod
+Restart=on-failure
+User=root
+Type=forking
+PIDFile=/run/pigpio.pid
+
+[Install]
+WantedBy=multi-user.target
