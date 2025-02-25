@@ -18,12 +18,12 @@ try:
         # increase LED brightness
         for duty_cycle in range(0, 256):
             pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
-            time.sleep(0.001)
-        
+            time.sleep(0.003)
+
         # decrease LED brightness
         for duty_cycle in range(255, -1, -1):
             pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
-            time.sleep(0.001)
+            time.sleep(0.003)
 except KeyboardInterrupt:
     # turn off LED
     print("Turning off LED")
