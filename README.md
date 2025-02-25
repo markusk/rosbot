@@ -15,81 +15,42 @@ _Please note: this code is still in the middle of the development process!_
 
 ### Download and install pigpio
 https://abyz.me.uk/rpi/pigpio/download.html
-
-(will be installed to /usr/local/lib and /usr/local/bin)
-
-
+(See detailed instructions there - will be installed to /usr/local/lib and /usr/local/bin)
 
 ### clone this repository
 https://github.com/markusk/rosbot
 
 ```bash
 git cloe https://github.com/markusk/rosbot.git
+cd rosbot
 ```
 
-## Step 2: Setting up pigpiod for autostart
-
-### systemd under Ubuntu
-
+## Step 2: Setting up pigpiod for autostart with systemd
 ```bash
-sudo cp raspi/etc__init.d__pigpiod-boot /etc/init.d/pigpiod-boot
+sudo cp raspi/etc__systemd__system__rosbot-boot.service /etc/systemd/system/
 sudo systemctl daemon-reload
-sudo systemctl enable pigpiod-boot
-sudo systemctl start pigpiod-boot
+sudo systemctl enable rosbot-boot.service
+sudo systemctl start rosbot-boot.service
 ```
 
-
-
-
-
-
-
-Choose:
-
-- Interfacing Options
-- P5 Serial
-- No (No Login shell over serial port)
-- Yes (Enable serial port hardware)
-
-Do _not_ reboot now!
-
-- Change /boot/cmdline.txt file regarding tty-entries to this (credits to [richard_mark](https://ubuntu-mate.community/t/writing-to-the-serial-port-gpio-tx-rx/4632/3)):
-
-[...] console=tty1 [...]
-
-```bash
-sudo nano /boot/cmdline.txt
-```
-
-- Add your user to the dialout group:
-
-```bash
-sudo gpasswd --add ${USER} dialout
-```
-
-- Now reboot the Raspberry Pi!
-
-## Step 2: Joystick/Gamepad OS support
-
+## Step 3: Joystick/Gamepad OS support
 ```bash
 sudo apt-get install joystick
 ```
 
 ### Microsoft XBOX Wireless Controller
-
 - Supported by the Kernel - if used with the USB connector.
 
 ### Gamepad/Joystick test
-
 - Connect a Gamepad to the Pi, start the following command and press any buttons or move some axes:
-
 ```bash
 jstest --normal /dev/input/js0
 ```
 
-## Step 3: ROS Noetic Setup (with Python 3 support)
 
-- Install ROS Noetic on your Raspberry Pi ([Instruction](https://varhowto.com/install-ros-noetic-raspberry-pi-4/)):
+## Step 3: ROS 2
+
+- Install ROS  on your Raspberry Pi ([Instruction](https://varhowto.com/install-ros-noetic-raspberry-pi-4/)):
 
 - Install ROS packages (+++ TO BE CHECKED !!! +++):
 
