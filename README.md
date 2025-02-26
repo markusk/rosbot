@@ -21,7 +21,7 @@ https://abyz.me.uk/rpi/pigpio/download.html
 https://github.com/markusk/rosbot
 
 ```bash
-git cloe https://github.com/markusk/rosbot.git
+git clone https://github.com/markusk/rosbot.git
 cd rosbot
 ```
 
