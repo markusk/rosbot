@@ -1,49 +1,42 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
+# coding=utf-8
 
-try:
-    import RPi.GPIO as GPIO
-except RuntimeError:
-    print("Error importing RPi.GPIO!  This is probably because you need superuser privileges.  You can achieve this by using 'sudo' to run your script")
-
-# import time # for sleep
-import time # for sleep
-
-# for poweroff
+import pigpio
+import time
 from subprocess import call
-
 
 #------
 # init
 #------
-GPIO.setmode(GPIO.BCM) # use the GPIO names, _not_ the pin numbers on the board
+pi = pigpio.pi()  # Verbindung zum pigpio Daemon herstellen
+print("Connecting to Raspi...")
+if not pi.connected:
+    exit()
 
-# pins	    BCM   BOARD
-ledPin     = 27 # pin 13
-switchPin  = 17 # pin 11
+# pins	    BCM
+ledPin     = 27
+switchPin  = 17
 
 # buttonCounter
 buttonPressed = 0
 
-
 # setup
 print('setup...')
-GPIO.setup(ledPin,   GPIO.OUT)
-GPIO.setup(switchPin, GPIO.IN, pull_up_down=GPIO.PUD_UP) # waits for LOW
-
+pi.set_mode(ledPin, pigpio.OUTPUT)
+pi.set_mode(switchPin, pigpio.INPUT)
+pi.set_pull_up_down(switchPin, pigpio.PUD_UP)  # waits for LOW
 
 # switch detection by interrupt, falling edge, with debouncing
-def my_callback(answer):
+def my_callback(gpio, level, tick):
     global buttonPressed
     buttonPressed += 1
-    print 'Button on GPIO ' + str(answer) + ' pushed the ' + str(buttonPressed) + ' time.'
+    print(f'Button on GPIO {gpio} pushed the {buttonPressed} time.')
 
 # add button pressed event detector
-GPIO.add_event_detect(switchPin, GPIO.FALLING, callback=my_callback, bouncetime=200)
-
+pi.callback(switchPin, pigpio.FALLING_EDGE, my_callback)
 
 # timing
 secs = 5
-
 
 #------
 # loop
@@ -51,15 +44,13 @@ secs = 5
 print('Press button now (5 secs)...!')
 
 # turn LED on
-GPIO.output(ledPin, GPIO.LOW)
+pi.write(ledPin, 0)
 
 # delay
 time.sleep(secs)
 
 # turn LED off
-GPIO.output(ledPin, GPIO.HIGH)
-
+pi.write(ledPin, 1)
 
 # cleanup
-GPIO.remove_event_detect(switchPin)
-GPIO.cleanup()
+pi.stop()
