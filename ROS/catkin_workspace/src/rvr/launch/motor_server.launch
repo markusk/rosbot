@@ -8,8 +8,8 @@ This launch file is for the robot.
   <!--
   Setting the hostname of the robot. This is to optional skip hardware setup steps later.
   -->
-  <param name="rvr/hostname" type="String" value="rvrmate" />
+  <param name="rosbot/hostname" type="String" value="rvrmate" />
 
   <!-- Controlling the motor on a hardware level -->
-  <node name="motor_server" pkg="rvr" type="motor_server.py" output="screen"/>
+  <node name="motor_server" pkg="rosbot" type="motor_server.py" output="screen"/>
 </launch>

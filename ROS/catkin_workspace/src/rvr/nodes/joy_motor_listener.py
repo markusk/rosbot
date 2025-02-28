@@ -4,8 +4,9 @@
 
 """
 This is my listener for the joy_node. It listens on the topic 'joy' and prints out some information.
-It then switches on motors on my Raspberry when the D-Pad is used on the gamepad.
-This needs the motor_server to be run on the robot/Raspberry Pi. Like this:
+It then switches on motors on the robot (Raspberry Pi) when the D-Pad is used on the gamepad.
+
+This needs the motor_server to be run on the robot. Like this:
 
 Usage
 -----
