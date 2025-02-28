@@ -5,7 +5,7 @@
 """
 This is my listener for the joy_node. It listens on the topic 'joy' and prints out some information.
 It then switches on motors on my Raspberry when the D-Pad is used on the gamepad.
-This needs the motor_server to be run on the Raspberry Pi. Like this:
+This needs the motor_server to be run on the robot/Raspberry Pi. Like this:
 
 Usage
 -----
@@ -14,13 +14,13 @@ Raspberry Pi:
 
 Another Ubuntu machine:
 1. export ROS_MASTER_URI=http://hostname-of-your-pi:11311/ from the robot. I.E.:
-   export ROS_MASTER_URI=http://rvr:11311/
+   export ROS_MASTER_URI=http://rosbot:11311/
 2. Set joystick device (if different) to js0. I.E.:
    rosparam set joy_node/dev "/dev/input/js2"
-3. roslaunch rvr joystick_control.launch
+3. roslaunch rosbot joystick_control.launch
 
 
-Author:  Markus Knapp, 2020
+Author:  Markus Knapp
 Website: https://direcs.de
 """
 
@@ -28,16 +28,16 @@ import rospy
 from std_msgs.msg import String
 from sensor_msgs.msg import Joy
 # name of the package(!).srv
-from rvr.srv import *
+from rosbot.srv import *
 
 
 # Getting robot parameters
 rospy.loginfo('Getting parameters for robot.')
 # speed of the motors (0-255).
-drivingSpeed = rospy.get_param('/rvr/drivingSpeed')
+drivingSpeed = rospy.get_param('/rosbot/drivingSpeed')
 rospy.loginfo('Using drivingSpeed %s.', drivingSpeed)
 # the speed when turning the bot can be higher if needed (higher friction)
-turnSpeed = rospy.get_param('/rvr/turnSpeed')
+turnSpeed = rospy.get_param('/rosbot/turnSpeed')
 rospy.loginfo('Using turnSpeed %s.', turnSpeed)
 
 # Service 'motor' from motor_server.py ready?
