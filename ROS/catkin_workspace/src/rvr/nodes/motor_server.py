@@ -2,17 +2,16 @@
 # coding=utf-8
 
 """
-This is a service node (server) to control motors on the RVR.
+This is a service node (server) to control motors on the rosbot.
 It controls the motors via [... tbd ...] on a Raspberry Pi.
 I expects the messsages "FORWARD, BACKWARD, LEFT, RIGHT, STOP".
 
-Author:  Markus Knapp, 2020
+Author:  Markus Knapp
 Website: https://direcs.de
 """
 
 
 # name of the package.srv
-from rvr.srv import *
 import rospy
 
 # Service nodes have to be initialised
@@ -20,7 +19,7 @@ rospy.init_node('motor_server', anonymous=False)
 
 # Getting robot parameters
 rospy.loginfo('Getting hostname for robot from config.')
-configHostname = rospy.get_param('/rvr/hostname')
+configHostname = rospy.get_param('/rosbot/hostname')
 rospy.loginfo("Awaiting hostname %s.", configHostname)
 
 # for coroutines
