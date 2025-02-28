@@ -9,8 +9,8 @@ This needs the motor_server to be run on the robot/Raspberry Pi. Like this:
 
 Usage
 -----
-Raspberry Pi:
-1. roslaunch rvr motor_server. (This starts also the roscore on this computer automatically).
+Robot (Raspberry Pi):
+1. roslaunch rosbot motor_server. (This starts also the roscore on this computer automatically).
 
 Another Ubuntu machine:
 1. export ROS_MASTER_URI=http://hostname-of-your-pi:11311/ from the robot. I.E.:
