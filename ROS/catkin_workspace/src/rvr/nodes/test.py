@@ -1,67 +1,31 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/')))
+""" LED soft on and off with PWM using pigpio """
 
-import asyncio
-from sphero_sdk import SpheroRvrAsync
-from sphero_sdk import SerialAsyncDal
-from sphero_sdk import BatteryVoltageStatesEnum as VoltageStates
+import pigpio
+import time
 
+LED_PIN = 18  # GPIO Pin for LED
 
-loop = asyncio.get_event_loop()
+pi = pigpio.pi()  # Connecting to pigpio daemon
+print("Connecting to Raspi...")
+if not pi.connected:
+    exit()
 
-rvr = SpheroRvrAsync(
-    dal=SerialAsyncDal(
-        loop
-    )
-)
+try:
+    while True:
+        # increase LED brightness
+        for duty_cycle in range(0, 256):
+            pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
+            time.sleep(0.003)
 
-
-async def main():
-    """ This program demonstrates how to retrieve the battery state of RVR.
-    """
-
-    await rvr.wake()
-
-    # Give RVR time to wake up
-    await asyncio.sleep(2)
-
-    battery_percentage = await rvr.get_battery_percentage()
-    #print('Battery percentage: ', battery_percentage)
-    # the result is a Python dictionary
-    print("The battery has {0:2d} % left.".format(battery_percentage["percentage"]))
-
-    battery_voltage_state = await rvr.get_battery_voltage_state()
-    # print('Voltage state: ', battery_voltage_state)
-    print("The battery voltage state is {0:1d}.".format(battery_voltage_state["state"]))
-
-    state_info = '[{}, {}, {}, {}]'.format(
-        '{}: {}'.format(VoltageStates.unknown.name, VoltageStates.unknown.value),
-        '{}: {}'.format(VoltageStates.ok.name, VoltageStates.ok.value),
-        '{}: {}'.format(VoltageStates.low.name, VoltageStates.low.value),
-        '{}: {}'.format(VoltageStates.critical.name, VoltageStates.critical.value)
-    )
-    print('Voltage states: ', state_info)
-
-    await rvr.close()
-
-
-if __name__ == '__main__':
-    try:
-        loop.run_until_complete(
-            main()
-        )
-
-    except KeyboardInterrupt:
-        print('\nProgram terminated with keyboard interrupt.')
-
-        loop.run_until_complete(
-            rvr.close()
-        )
-
-    finally:
-        if loop.is_running():
-            loop.close()
+        # decrease LED brightness
+        for duty_cycle in range(255, -1, -1):
+            pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
+            time.sleep(0.003)
+except KeyboardInterrupt:
+    # turn off LED
+    print("Turning off LED")
+    pi.set_PWM_dutycycle(LED_PIN, 0)
+    pi.stop()  # closeing connection
