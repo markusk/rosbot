@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-Controls the whole robot and has to run on the "RVR" (Raspberry Pi).
+Controls the whole robot and has to run on the "rosbot" (Raspberry Pi).
 -->
 <launch>
   <!--
   Setting the hostname of the robot. This is to optional skip hardware setup steps later.
   -->
-  <param name="rvr/hostname" type="String" value="rvrmate" />
+  <param name="rosbot/hostname" type="String" value="rosbot" />
 
   <!--
   Setting the diffent speeds for the robot.
   -->
-  <param name="rvr/drivingSpeed" type="int" value="75" />
-  <param name="rvr/turnSpeed"    type="int" value="90" />
+  <param name="rosbot/drivingSpeed" type="int" value="75" />
+  <param name="rosbot/turnSpeed"    type="int" value="90" />
   
   <!--
     For the Adafruit motor hat the motor speed is 0-255.
     s.a. https://learn.adafruit.com/adafruit-motor-shield-v2-for-arduino/library-reference
   -->
-  <param name="rvr/minMotorSpeed" type="int" value="0"   />
-  <param name="rvr/maxMotorSpeed" type="int" value="255" />
+  <param name="rosbot/minMotorSpeed" type="int" value="0"   />
+  <param name="rosbot/maxMotorSpeed" type="int" value="255" />
 
   <!-- Publishing "/tf" tf/tfMessages for the transformation tree. -->
-  <!-- <node name="tf_broadcaster" pkg="rvr" type="tf_broadcaster.py" output="screen"/> -->
+  <!-- <node name="tf_broadcaster" pkg="rosbot" type="tf_broadcaster.py" output="screen"/> -->
 
   <!-- Publishing the battery voltage as Float32. -->
-  <!-- <node name="battery_publisher" pkg="rvr" type="battery_publisher.py" output="screen"/> -->
+  <!-- <node name="battery_publisher" pkg="rosbot" type="battery_publisher.py" output="screen"/> -->
 
   <!-- Publishing "odom" nav_msgs/Odometry for the local planner (navigation stack). -->
-  <!-- <node name="odom_publisher" pkg="rvr" type="odom_publisher.py" output="screen"/> -->
+  <!-- <node name="odom_publisher" pkg="rosbot" type="odom_publisher.py" output="screen"/> -->
 
   <!-- Controlling the motor on a hardware level -->
-  <node name="motor_server" pkg="rvr" type="motor_server.py" output="screen"/>
+  <node name="motor_server" pkg="rosbot" type="motor_server.py" output="screen"/>
 
   <!-- Base controller listens to "cmd_vel" geometry_msgs/Twist messages and publishes motor control messages (for the motor_server node). -->
-  <node name="base_controller" pkg="rvr" type="base_controller.py" output="screen"/>
+  <node name="base_controller" pkg="rosbot" type="base_controller.py" output="screen"/>
 
   <!-- Camera support -->
-  <!-- <node pkg="rvr" type="camera" name="rvr_camera" output="screen"/> -->
+  <!-- <node pkg="rosbot" type="camera" name="rosbot_camera" output="screen"/> -->
 
   <!-- This is for the laser Hokuyo URG04lx laser rangefinder. -->
   <!-- <node name="laser" pkg="urg_node" type="urg_node" args="/dev/ttyLaser" output="screen"/> -->
