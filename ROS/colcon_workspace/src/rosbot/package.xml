@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>rvr</name>
+  <name>rosbot</name>
   <version>0.0.0</version>
-  <description>The rvr package</description>
+  <description>The rosbot package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
