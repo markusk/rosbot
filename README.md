@@ -85,20 +85,18 @@ cd ~/ros2_ws
 ```bash
 ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
 cd src
-colcon build
+colcon build --symlink-install
 ```
 
-## Step 6: Setup Sphero Public SDK
+## Step 7: Run ROS 2
 
-## Step 7: Run ROS
-
-### Test the RVR ROS package
+### Test the rosbot ROS package
 
 - Start the ROS launch file:
 
 ```bash
-cd ~/catkin_ws
-roslaunch rvr test.launch
+cd ~/ros2_ws
+ros2 launch rosbot test.launch
 ```
 
 - The output should look like above.
