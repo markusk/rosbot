@@ -83,7 +83,7 @@ cd ~/ros2_ws
 - Create symbolic link with the name 'src', pointing to the 'src' folder in the ROS directory from this repository:
 
 ```bash
-ln -s ~/develop/rrosbot/ROS/colcon_workspace/src/ src
+ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
 catkin_make
 ```
 

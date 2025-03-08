@@ -13,14 +13,15 @@ That's it.
 export ROS_DOMAIN_ID=0
 export ROS_HOSTNAME=rosbot
 export ROS_MASTER_URI=http://rosbot:11311
-roslaunch rosbot keyboard_control.launch
+source /opt/ros/jazzy/setup.bash
+ros2 launch rosbot keyboard_control.launch
 
 2. Usage (on the a remote computer):
 export ROS_DOMAIN_ID=0
 export ROS_HOSTNAME=<client hostname>
 export ROS_MASTER_URI=http://rosbot:11311
 
-rosrun teleop_twist_keyboard teleop_twist_keyboard.py
+ros2 run teleop_twist_keyboard teleop_twist_keyboard.py
 
 Author:  Markus Knapp
 Website: https://direcs.de
