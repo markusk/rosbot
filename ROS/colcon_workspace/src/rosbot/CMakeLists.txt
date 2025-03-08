@@ -27,10 +27,10 @@ find_package(sensor_msgs REQUIRED)
 ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
-install(PROGRAMS
-  scripts/my_python_script.py
-  DESTINATION lib/${PROJECT_NAME}
-)
+# install(PROGRAMS
+#   scripts/my_python_script.py
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 # Install launch files
 install(DIRECTORY
@@ -39,9 +39,9 @@ install(DIRECTORY
 )
 
 # Install other files
-install(DIRECTORY
-  config
-  DESTINATION share/${PROJECT_NAME}
-)
+# install(DIRECTORY
+#   config
+#   DESTINATION share/${PROJECT_NAME}
+# )
 
 ament_package()
