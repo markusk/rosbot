@@ -73,17 +73,17 @@ cd ~/develop
 git clone https://github.com/markusk/rvr.git
 ```
 
-- Create a catkin workspace _without_ 'src' subfolder:
+- Create a colcon workspace (ROS 2) _without_ 'src' subfolder:
 
 ```bash
-mkdir ~/catkin_ws
-cd ~/catkin_ws
+mkdir ~/ros2_ws
+cd ~/ros2_ws
 ```
 
 - Create symbolic link with the name 'src', pointing to the 'src' folder in the ROS directory from this repository:
 
 ```bash
-ln -s ~/develop/rvr/ROS/catkin_workspace/src/ src
+ln -s ~/develop/rrosbot/ROS/colcon_workspace/src/ src
 catkin_make
 ```
 
