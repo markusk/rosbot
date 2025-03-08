@@ -84,7 +84,8 @@ cd ~/ros2_ws
 
 ```bash
 ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
-catkin_make
+cd src
+colcon build
 ```
 
 ## Step 6: Setup Sphero Public SDK
