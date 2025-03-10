@@ -4,8 +4,8 @@ from launch_ros.actions import Node
 def generate_launch_description():
     return LaunchDescription([
         Node(
-            package='my_robot',
-            executable='my_node',
+            package='testbot',
+            executable='testnode',
             output='screen'
         ),
     ])
