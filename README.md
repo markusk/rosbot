@@ -84,8 +84,10 @@ cd ~/ros2_ws
 
 ```bash
 ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
-cd src
+
+cd ~/ros2_ws
 colcon build --symlink-install
+source install/setup.bash
 ```
 
 ## Step 7: Run ROS 2
