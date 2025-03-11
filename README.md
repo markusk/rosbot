@@ -54,8 +54,9 @@ jstest --normal /dev/input/js0
 
 - Install ROS packages (+++ TO BE DEFINED !!! +++):
 
+- Do not forget to "autostart" ros; i.e. in your terminal, when logging in:
 ```bash
-lorep ipsum
+echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
 ```
 
 ## Step 5: Create a central place for this repository
