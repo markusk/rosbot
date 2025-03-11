@@ -1,0 +1,17 @@
+<package format="3">
+  <name>testbot</name>
+  <version>0.0.1</version>
+  <description>My ROS 2 test node</description>
+  <maintainer email="github@direcs.de">Markus</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_python</buildtool_depend>
+
+  <depend>rclpy</depend>
+  <depend>std_msgs</depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>
