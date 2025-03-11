@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'testbot'
+package_name = 'rosbot'
 
 setup(
     name=package_name,
@@ -12,12 +12,12 @@ setup(
     zip_safe=True,
     maintainer='Markus',
     maintainer_email='github@direcs.de',
-    description='My ROS 2 test node',
+    description='My "rosbot" ROS 2 node',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'testnode = testbot.testnode:main',
+            'testnode = rosbot.testnode:main',
         ],
     },
     data_files=[

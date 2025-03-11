@@ -1,7 +1,7 @@
 <package format="3">
-  <name>testbot</name>
+  <name>rosbot</name>
   <version>0.0.1</version>
-  <description>My ROS 2 test node</description>
+  <description>My "rosbot" ROS 2 node</description>
   <maintainer email="github@direcs.de">Markus</maintainer>
   <license>MIT</license>
 
