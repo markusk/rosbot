@@ -2,14 +2,14 @@
 import rclpy
 from rclpy.node import Node
 
-class TestNode(Node):
+class LEDPWMNode(Node):
     def __init__(self):
-        super().__init__('testnode')
+        super().__init__('LEDPWMNode')
         self.get_logger().info('Hello ROS 2 world!')
 
 def main(args=None):
     rclpy.init(args=args)
-    node = TestNode()
+    node = LEDPWMNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

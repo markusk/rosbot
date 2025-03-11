@@ -17,7 +17,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'testnode = rosbot.testnode:main',
+            'LEDPWMNode = rosbot.LEDPWMNode:main',
         ],
     },
     data_files=[

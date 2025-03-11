@@ -5,7 +5,7 @@ def generate_launch_description():
     return LaunchDescription([
         Node(
             package='rosbot',
-            executable='testnode',
+            executable='LEDPWMNode',
             output='screen'
         ),
     ])
