@@ -85,11 +85,20 @@ cd ~/ros2_ws
 
 ```bash
 ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
+```
 
+- Now also source your ROS workspace you created:
+```bash
+echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
+```
+
+- Build the ROS rosbot package
+```bash
 cd ~/ros2_ws
 colcon build --symlink-install
 source install/setup.bash
 ```
+
 
 ## Step 7: Run ROS 2
 
