@@ -77,10 +77,7 @@ git clone https://github.com/markusk/rvr.git
 - Create a colcon workspace (ROS 2) _with_ 'src' subfolder:
 
 ```bash
-mkdir ~/ros2_ws
-cd ~/ros2_ws
-mkdir src
-cd src
+mkdir -p ~/ros2_ws/src
 ```
 
 - Create symbolic link with the name of each ros package from this repository, pointing into the 'src' folder in the ROS directory from this repo:
