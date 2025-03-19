@@ -80,7 +80,7 @@ git clone https://github.com/markusk/rvr.git
 mkdir -p ~/ros2_ws/src
 ```
 
-- Create symbolic link with the name of each ros package from this repository, pointing into the 'src' folder in the ROS directory from this repo:
+- Create symbolic link with the name of each ros package from this repository, pointing into the 'src' folder from your ROS/colcon workspace (ros_ws):
 
 ```bash
 cd ~/ros2_ws/src
