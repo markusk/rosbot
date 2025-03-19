@@ -74,17 +74,21 @@ cd ~/develop
 git clone https://github.com/markusk/rvr.git
 ```
 
-- Create a colcon workspace (ROS 2) _without_ 'src' subfolder:
+- Create a colcon workspace (ROS 2) _with_ 'src' subfolder:
 
 ```bash
 mkdir ~/ros2_ws
 cd ~/ros2_ws
+mkdir src
+cd src
 ```
 
-- Create symbolic link with the name 'src', pointing to the 'src' folder in the ROS directory from this repository:
+- Create symbolic link with the name of each ros package from this repository, pointing into the 'src' folder in the ROS directory from this repo:
 
 ```bash
-ln -s ~/develop/rosbot/ROS/colcon_workspace/src/ src
+cd ~/ros2_ws/src
+ln -s ~/develop/rosbot/ROS/colcon_workspace/src/rosbot rosbot
+ln -s ~/develop/rosbot/ROS/colcon_workspace/src/testbot testbot
 ```
 
 - Now also source your ROS workspace you created:
