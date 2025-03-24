@@ -135,3 +135,6 @@ ROS/catkin_workspace/src/CMakeLists.txt
 .fw
 # Symbolic Link to the Sphero SDK
 lib/*
+
+# Markus stuff
+ROS/colcon_workspace/src/install/*
