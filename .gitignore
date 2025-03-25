@@ -138,3 +138,4 @@ lib/*
 
 # Markus stuff
 ROS/colcon_workspace/src/install/*
+ROS/colcon_workspace/src/log/*
