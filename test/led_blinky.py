@@ -8,9 +8,9 @@ import pigpio
 import time
 
 
-PIN = 18  # Wähle eine GPIO-Nummer
+PIN = 18  # GPIO number for a LED
 
-pi = pigpio.pi()  # Verbindung zum pigpio-Daemon
+pi = pigpio.pi()  # connect to pigpio daemon
 
 
 print("Connecting to Raspi...")
@@ -21,12 +21,12 @@ if not pi.connected:
 try:
     while True:
         print("ON")
-        pi.write(PIN, 1)  # HIGH setzen
+        pi.write(PIN, 1)  # set to HIGH
         time.sleep(1)
         print("OFF")
-        pi.write(PIN, 0)  # LOW setzen
+        pi.write(PIN, 0)  # set to LOW
         time.sleep(1)
 except KeyboardInterrupt:
     print("OFF")
-    pi.write(PIN, 0)  # LOW setzen
-    pi.stop()  # Verbindung schließen
+    pi.write(PIN, 0)  # set to LOW again
+    pi.stop()  # close connection

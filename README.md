@@ -1,4 +1,4 @@
-# rvr
+# rosbot
 
 A ROS Python package for my rosbot - running on a Raspberry Pi.
 

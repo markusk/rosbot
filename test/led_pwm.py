@@ -16,7 +16,7 @@ if not pi.connected:
 try:
     while True:
         # increase LED brightness
-        for duty_cycle in range(0, 256):
+        for duty_cycle in range(0, 255):
             pi.set_PWM_dutycycle(LED_PIN, duty_cycle)
             time.sleep(0.003)
 
