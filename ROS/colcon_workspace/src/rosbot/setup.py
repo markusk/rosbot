@@ -18,6 +18,8 @@ setup(
     entry_points={
         'console_scripts': [
             'LEDPWMNode = rosbot.LEDPWMNode:main',
+            'MotorControllerNode = rosbot.MotorControllerNode:main',
+            'TeleopKeyboardNode = rosbot.TeleopKeyboardNode:main',
         ],
     },
     data_files=[
