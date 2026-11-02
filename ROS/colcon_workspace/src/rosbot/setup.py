@@ -20,6 +20,7 @@ setup(
             'LEDPWMNode = rosbot.LEDPWMNode:main',
             'MotorControllerNode = rosbot.MotorControllerNode:main',
             'TeleopKeyboardNode = rosbot.TeleopKeyboardNode:main',
+            'TeleopJoystickNode = rosbot.TeleopJoystickNode:main',
         ],
     },
     data_files=[

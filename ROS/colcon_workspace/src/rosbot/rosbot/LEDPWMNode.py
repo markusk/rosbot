@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
-import pigpio
 import time
 import socket
 
@@ -15,7 +14,9 @@ class LEDPWMNode(Node):
         self.pi = None
 
         if self.hostname == 'rosbot':
-            self.pi = pigpio.pi()  # Connecting to pigpio daemon
+            import pigpio
+
+            self.pi = pigpio.pi()
             self.get_logger().info("Connecting to Raspi...")
             if not self.pi.connected:
                 self.get_logger().error("Failed to connect to pigpio daemon")

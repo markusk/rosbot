@@ -2,7 +2,6 @@
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
-import pigpio
 import socket
 import math
 
@@ -25,6 +24,8 @@ class MotorControllerNode(Node):
 
         # Verbindung zum Raspberry Pi
         if self.hostname == 'rosbot':
+            import pigpio
+
             self.pi = pigpio.pi()
             self.get_logger().info("Verbinde mit Raspberry Pi...")
             if not self.pi.connected:
