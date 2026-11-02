@@ -101,81 +101,34 @@ source install/setup.bash
 ```
 
 
-## Step 7: Run ROS 2
+## Step 4: Build and run ROS 2
 
-### Test the rosbot ROS package
+Install ROS 2 Jazzy and the Raspberry Pi dependencies using the official [ROS 2 Raspberry Pi guide](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html). The active ROS 2 package is `ROS/colcon_workspace/src/rosbot`; `ROS/rosbot.old__TMP!__migrating_to_ros2_!` is a non-buildable ROS 1 archive and its launch files must not be used with ROS 2.
 
-- Start the ROS launch file:
-
-```bash
-cd ~/ros2_ws
-ros2 launch rosbot test.launch
-```
-
-- The output should look like above.
-- Exit the program with CTRL-C.
-
-### The main launch file
-
-- Run the main launch file on the robot (Raspberry Pi):
+From the repository root:
 
 ```bash
-cd ~/catkin_ws
-roslaunch rvr rvr.launch
+source /opt/ros/jazzy/setup.bash
+cd ROS/colcon_workspace
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --packages-select rosbot
+source install/setup.bash
 ```
 
-_**to do:**_ On another computer (the ground control center):
+On the Raspberry Pi, install/start pigpio before launching hardware nodes:
 
 ```bash
-export ROS_MASTER_URI=http://<hostname>:11311
-rosparam set joy_node/dev "/dev/input/js1"
-roslaunch rvr ground_control_center.launch
+sudo apt-get install pigpio python3-pigpio
+sudo systemctl enable --now pigpiod
+ros2 launch rosbot rosbot_launch.py
 ```
 
-## _**to do:**_ Step 8: Setting up ROS for autostart
-
-### systemd under Ubuntu
+The joystick is optional and disabled by default. On the Pi with a controller attached, use:
 
 ```bash
-sudo cp raspi/etc__systemd__system__rvr-ros-start.service /etc/systemd/system/rvr-ros-start.service
-sudo systemctl daemon-reload
-sudo systemctl start rvr-ros-start.service
-sudo systemctl enable rvr-ros-start.service
+ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
 ```
 
----
+The launch setup checks that the hostname is exactly `rosbot` before starting the Linux joystick device node. Motor and LED GPIO access is also enabled only on that hostname; on a Mac, the hardware nodes simulate/no-op. To exercise joystick mapping without a device, publish `sensor_msgs/Joy` to `/joy`; to exercise the motor command interface, publish `geometry_msgs/Twist` to `/cmd_vel`.
 
-## The ROS launch files
-
-### K
-
-#### keyboard_control_test
-
-Listens to a teleop_twist_keyboard node and prints out the data/messages. Uses:
-
-- _teleop_twist_keyboard_
-- _nodes/keyboard_listener.py_
-
-### M
-
-#### motor_server
-
-Controls the motors on the robot. Uses:
-
-- _motor_server.py_
-
-### R
-
-#### rvr
-
-Controls the whole robot. To be started on the robot. Uses:
-
-- _motor_server.py_
-
-_**to do:**_
-- _tf_broadcaster.py_
-- _battery_publisher.py_
-- _imu_bno055.py_
-- _base_controller.py_
-- _minibot_camera_
-- _urg_node_
+For package details, migrated functionality, parameters, and hardware limitations, see `ROS/colcon_workspace/src/rosbot/README.md`. The ROS 1 `roslaunch`, `catkin_ws`, and `ROS_MASTER_URI` instructions formerly in this README are obsolete and are not supported by the active package.

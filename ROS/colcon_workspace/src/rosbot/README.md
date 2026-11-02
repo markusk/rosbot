@@ -3,6 +3,23 @@
 ## Übersicht
 Dieses Paket enthält ROS2-Nodes für einen Omniwheel-Roboter mit 4 Motoren auf einem Raspberry Pi.
 
+## ROS 2 migration status
+
+The active package is `ROS/colcon_workspace/src/rosbot`. The directory `ROS/rosbot.old__TMP!__migrating_to_ros2_!` is a legacy ROS 1 reference and is not built or installed by colcon. ROS 1 `rospy` nodes, XML launch files, and the custom `Motor.srv` were not copied into the ROS 2 package.
+
+| Legacy functionality | ROS 2 status |
+| --- | --- |
+| Keyboard control and `cmd_vel` motor control | Existing `TeleopKeyboardNode` and `MotorControllerNode` are the current implementation. |
+| Xbox/D-pad joystick input | Migrated to `TeleopJoystickNode`, publishing `cmd_vel` from validated `sensor_msgs/Joy` axes/buttons. |
+| ROS 1 motor services | Not migrated: both old service servers are logging/placeholders, and the ROS 2 motor node uses PWM directly. |
+| Sphero RVR odometry and battery | Not migrated: legacy odometry is an incomplete prototype and battery code is a standalone SDK script, not a ROS publisher. They require confirmed hardware, SDK, and frame/units behavior before a safe ROS 2 port. |
+| GPIO LED test | Covered by the existing `LEDPWMNode`. |
+| Empty heading driver and print-only keyboard listener | No independent functionality to migrate. |
+
+GPIO access remains restricted to the host whose hostname is exactly `rosbot`; other hosts use simulation/no hardware access. The joystick device node is likewise only added by the launch file on `rosbot`. On a Mac, joystick commands can be simulated by publishing `sensor_msgs/Joy` to `/joy` or `geometry_msgs/Twist` to `/cmd_vel`.
+
+The existing motor controller currently drives PWM outputs only and discards wheel-command signs. Do not treat reverse/turning hardware behavior as validated until the motor driver's direction wiring and GPIO mapping are confirmed and direction control is implemented.
+
 ## Nodes
 
 ### 1. MotorControllerNode
@@ -34,6 +51,9 @@ Tastatursteuerung für den Roboter.
 ### 3. LEDPWMNode
 Beispiel-Node für LED-Steuerung (GPIO 18).
 
+### 4. TeleopJoystickNode
+Consumes `sensor_msgs/Joy` on `/joy` and publishes `geometry_msgs/Twist` on `/cmd_vel`. The default mapping supports the legacy controller axes 5/7 for forward/backward, axes 4/6 for turning, and buttons 10/1 for stop. Axis and button indices plus speeds are ROS parameters, and short or differently sized joystick messages are handled without indexing errors.
+
 ## Installation
 
 ### Voraussetzungen
@@ -55,10 +75,18 @@ source install/setup.bash
 
 ## Verwendung
 
-### Alle Nodes starten (mit Launch-Datei)
+### Nodes starten
 ```bash
 ros2 launch rosbot rosbot_launch.py
 ```
+
+The joystick is disabled by default. On the Raspberry Pi with a joystick connected, enable it and optionally select another device index:
+
+```bash
+ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
+```
+
+On a Mac, the launch file intentionally does not start the Linux `joy_node`; run the teleop node and publish test messages to `/joy`, or publish commands directly to `/cmd_vel`.
 
 ### Einzelne Nodes starten
 
