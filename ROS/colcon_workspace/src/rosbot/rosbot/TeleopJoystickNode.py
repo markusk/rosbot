@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Convert joystick messages into robot velocity commands."""
 
-import rclpy
 from geometry_msgs.msg import Twist
+import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
 

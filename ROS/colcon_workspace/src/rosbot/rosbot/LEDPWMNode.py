@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
+import socket
+
 import rclpy
 from rclpy.node import Node
-import time
-import socket
+
 
 class LEDPWMNode(Node):
     def __init__(self):
@@ -17,12 +18,12 @@ class LEDPWMNode(Node):
             import pigpio
 
             self.pi = pigpio.pi()
-            self.get_logger().info("Connecting to Raspi...")
+            self.get_logger().info('Connecting to Raspi...')
             if not self.pi.connected:
-                self.get_logger().error("Failed to connect to pigpio daemon")
+                self.get_logger().error('Failed to connect to pigpio daemon')
                 exit()
         else:
-            self.get_logger().info("Simulating LED behavior")
+            self.get_logger().info('Simulating LED behavior')
 
         self.timer = self.create_timer(0.003, self.pwm_callback)
         self.duty_cycle = 0
@@ -51,14 +52,16 @@ class LEDPWMNode(Node):
                 if self.duty_cycle <= 0:
                     self.increasing = True
 
-            self.get_logger().info(f"Simulated LED duty cycle: {self.duty_cycle}")
+            self.get_logger().info(
+                f'Simulated LED duty cycle: {self.duty_cycle}')
 
     def destroy_node(self):
         if self.hostname == 'rosbot' and self.pi:
-            self.get_logger().info("Turning off LED")
+            self.get_logger().info('Turning off LED')
             self.pi.set_PWM_dutycycle(self.LED_PIN, 0)
             self.pi.stop()
         super().destroy_node()
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -66,6 +69,7 @@ def main(args=None):
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
+
 
 if __name__ == '__main__':
     main()
