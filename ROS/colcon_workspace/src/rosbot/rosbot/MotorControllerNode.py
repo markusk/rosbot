@@ -9,74 +9,74 @@ from rclpy.node import Node
 class MotorControllerNode(Node):
     def __init__(self):
         super().__init__('MotorControllerNode')
-        self.get_logger().info('Motor Controller Node gestartet')
+        self.get_logger().info('Motor controller node started')
 
-        # GPIO Pins für die 4 Motoren (PWM)
-        self.MOTOR_FL_PIN = 4
-        self.MOTOR_FR_PIN = 5
-        self.MOTOR_RL_PIN = 6
-        self.MOTOR_RR_PIN = 7
+        # GPIO pins for the 4 motors (PWM)
+        self.MOTOR_FL_PIN = 4 # front left
+        self.MOTOR_FR_PIN = 5 # front right
+        self.MOTOR_RL_PIN = 6 # rear left
+        self.MOTOR_RR_PIN = 7 # rear right
 
-        # Richtungs-Pins (optional, falls H-Bridge verwendet wird)
-        # Können später hinzugefügt werden
+        # direction pins (optional, if using a H-Bridge)
+        # Can be added later
 
         self.hostname = socket.gethostname()
         self.pi = None
 
-        # Verbindung zum Raspberry Pi
+        # Connection to Raspberry Pi
         if self.hostname == 'rosbot':
             import pigpio
 
             self.pi = pigpio.pi()
-            self.get_logger().info('Verbinde mit Raspberry Pi...')
+            self.get_logger().info('Connecting to Raspberry Pi...')
             if not self.pi.connected:
                 self.get_logger().error(
-                    'Verbindung zu pigpio daemon fehlgeschlagen')
+                    'ERR: Connection to pigpio daemon failed. Please ensure pigpio is running on the Raspberry Pi.')
                 exit()
 
-            # PWM Frequenz setzen (z.B. 1000 Hz)
+            # set PWM frequency (i.e. 1000 Hz)
             self.pi.set_PWM_frequency(self.MOTOR_FL_PIN, 1000)
             self.pi.set_PWM_frequency(self.MOTOR_FR_PIN, 1000)
             self.pi.set_PWM_frequency(self.MOTOR_RL_PIN, 1000)
             self.pi.set_PWM_frequency(self.MOTOR_RR_PIN, 1000)
 
-            self.get_logger().info('Motoren initialisiert')
+            self.get_logger().info('Motors initialised')
         else:
             self.get_logger().info(
-                'Simulationsmodus - kein Raspberry Pi erkannt')
+                'Simulation mode - no Raspberry Pi detected')
 
-        # Twist-Subscriber für Bewegungsbefehle
+        # twist subscriber for move commands
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
             self.cmd_vel_callback,
             10)
 
-        # Aktuelle Geschwindigkeiten
+        # current speed
         self.linear_x = 0.0
         self.linear_y = 0.0
         self.angular_z = 0.0
 
-        # Motor-Geschwindigkeiten (0-255)
+        # motor speeds (0-255)
         self.motor_fl = 0
         self.motor_fr = 0
         self.motor_rl = 0
         self.motor_rr = 0
 
-        # Roboter-Parameter (können angepasst werden)
-        self.wheel_base = 0.2  # Abstand zwischen Vorder- und Hinterachse (m)
-        self.track_width = 0.2  # Abstand zwischen linken und rechten Rädern (m)
-        self.max_speed = 1.0  # Maximale Geschwindigkeit (m/s)
+        # robot parameters (can be adjusted based on the actual robot dimensions)
+        self.wheel_base = 0.2   # Distance between front and rear axles (m)
+        self.track_width = 0.2  # Distance between left and right wheels (m)
+        self.max_speed = 1.0    # Maximum speed (m/s)
 
     def cmd_vel_callback(self, msg):
         self.linear_x = msg.linear.x
         self.linear_y = msg.linear.y
         self.angular_z = msg.angular.z
 
-        # Berechne Motor-Geschwindigkeiten für Omniwheel-Kinematik
+        # calculating wheel speeds for omniwheel kinematics
         self.calculate_motor_speeds()
 
-        # Setze PWM-Werte
+        # Set PWM values
         self.set_motor_pwm()
 
         if self.hostname != 'rosbot':
@@ -96,18 +96,18 @@ class MotorControllerNode(Node):
         - Rear Left: vx + vy - w
         - Rear Right: vx - vy + w
         """
-        # Normalisiere Eingaben
+        # normalising inputs
         vx = self.linear_x / self.max_speed
         vy = self.linear_y / self.max_speed
         w = self.angular_z
 
-        # Berechne Rad-Geschwindigkeiten
+        # calculating wheel speeds
         fl = vx - vy - w * (self.wheel_base + self.track_width) / 2
         fr = vx + vy + w * (self.wheel_base + self.track_width) / 2
         rl = vx + vy - w * (self.wheel_base + self.track_width) / 2
         rr = vx - vy + w * (self.wheel_base + self.track_width) / 2
 
-        # Finde maximalen Wert für Normalisierung
+        # find maximal value for normalisation
         max_val = max(abs(fl), abs(fr), abs(rl), abs(rr))
         if max_val > 1.0:
             fl /= max_val
@@ -115,14 +115,14 @@ class MotorControllerNode(Node):
             rl /= max_val
             rr /= max_val
 
-        # Konvertiere zu PWM-Werten (0-255)
+        # convert to PWM values (0-255)
         self.motor_fl = int(abs(fl) * 255)
         self.motor_fr = int(abs(fr) * 255)
         self.motor_rl = int(abs(rl) * 255)
         self.motor_rr = int(abs(rr) * 255)
 
-        # TODO: Richtung berücksichtigen (Vorzeichen von fl, fr, rl, rr)
-        # Dies erfordert zusätzliche GPIO-Pins für die Richtungssteuerung
+        # TODO: take direction into account (sign of fl, fr, rl, rr)
+        # This requires additional GPIO pins for direction control
 
     def set_motor_pwm(self):
         """Set PWM values for all motors."""
@@ -139,12 +139,12 @@ class MotorControllerNode(Node):
         self.motor_rl = 0
         self.motor_rr = 0
         self.set_motor_pwm()
-        self.get_logger().info('Alle Motoren gestoppt')
+        self.get_logger().info('All motors stopped')
 
     def destroy_node(self):
         """Clean up hardware resources before shutting down."""
         if self.hostname == 'rosbot' and self.pi:
-            self.get_logger().info('Stoppe Motoren und beende...')
+            self.get_logger().info('Stopping motors and shutting down...')
             self.stop_motors()
             self.pi.stop()
         super().destroy_node()
