@@ -43,8 +43,15 @@ class MotorControllerNode(Node):
 
             self.get_logger().info('Motors initialised')
         else:
-            self.get_logger().info(
-                'Simulation mode - no Raspberry Pi detected')
+            msg = """
+            ╔═══════════════════════════════╗
+            ║       SIMULATING ROSBOT       ║
+            ╠═══════════════════════════════╣
+            ║   No Raspberry Pi detected.   ║
+            ╚═══════════════════════════════╝
+            """
+            self.get_logger().info(msg)
+#                'Simulation mode - no Raspberry Pi detected')
 
         # twist subscriber for move commands
         self.subscription = self.create_subscription(
