@@ -14,7 +14,8 @@ class TeleopKeyboardNode(Node):
         self.get_logger().info('Keyboard teleoperation node started')
 
         # Publisher for cmd_vel
-        self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.publisher = self.create_publisher(
+            Twist, 'keyboard_cmd_vel', 10)
 
         # Speed parameters
         self.linear_speed = 0.5  # m/s
@@ -67,7 +68,7 @@ class TeleopKeyboardNode(Node):
     def print_status(self):
         """Print the current speed and movement status."""
         print(
-            f'\Speed: linear={self.linear_speed:.2f} m/s, '
+            f'\nSpeed: linear={self.linear_speed:.2f} m/s, '
             f'angular={self.angular_speed:.2f} rad/s')
         print(
             f'Current: vx={self.current_linear_x:.2f}, '

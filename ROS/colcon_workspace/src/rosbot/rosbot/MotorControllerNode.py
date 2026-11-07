@@ -12,10 +12,10 @@ class MotorControllerNode(Node):
         self.get_logger().info('Motor controller node started')
 
         # GPIO pins for the 4 motors (PWM)
-        self.MOTOR_FL_PIN = 4 # front left
-        self.MOTOR_FR_PIN = 5 # front right
-        self.MOTOR_RL_PIN = 6 # rear left
-        self.MOTOR_RR_PIN = 7 # rear right
+        self.MOTOR_FL_PIN = 4  # front left
+        self.MOTOR_FR_PIN = 5  # front right
+        self.MOTOR_RL_PIN = 6  # rear left
+        self.MOTOR_RR_PIN = 7  # rear right
 
         # direction pins (optional, if using a H-Bridge)
         # Can be added later
@@ -31,7 +31,8 @@ class MotorControllerNode(Node):
             self.get_logger().info('Connecting to Raspberry Pi...')
             if not self.pi.connected:
                 self.get_logger().error(
-                    'ERR: Connection to pigpio daemon failed. Please ensure pigpio is running on the Raspberry Pi.')
+                    'ERR: Connection to pigpio daemon failed. '
+                    'Please ensure pigpio is running on the Raspberry Pi.')
                 exit()
 
             # set PWM frequency (i.e. 1000 Hz)
