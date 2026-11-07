@@ -11,17 +11,17 @@ from rclpy.node import Node
 class TeleopKeyboardNode(Node):
     def __init__(self):
         super().__init__('TeleopKeyboardNode')
-        self.get_logger().info('Tastatur-Steuerung gestartet')
+        self.get_logger().info('Keyboard teleoperation node started')
 
-        # Publisher für cmd_vel
+        # Publisher for cmd_vel
         self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
 
-        # Geschwindigkeitsparameter
+        # Speed parameters
         self.linear_speed = 0.5  # m/s
         self.angular_speed = 1.0  # rad/s
         self.speed_increment = 0.1
 
-        # Aktuelle Geschwindigkeiten
+        # Current speeds
         self.current_linear_x = 0.0
         self.current_linear_y = 0.0
         self.current_angular_z = 0.0
@@ -31,35 +31,35 @@ class TeleopKeyboardNode(Node):
     def print_instructions(self):
         """Print the keyboard control instructions."""
         msg = """
-        ╔════════════════════════════════════════╗
-        ║   ROSBOT TASTATUR-STEUERUNG           ║
-        ╠════════════════════════════════════════╣
-        ║                                        ║
-        ║   Bewegung (Omniwheel):                ║
-        ║                                        ║
-        ║        W (vorwärts)                    ║
-        ║        ↑                               ║
-        ║   A ← + → D                            ║
-        ║        ↓                               ║
-        ║        S (rückwärts)                   ║
-        ║                                        ║
-        ║   Q: links vorwärts diagonal           ║
-        ║   E: rechts vorwärts diagonal          ║
-        ║   Z: links rückwärts diagonal          ║
-        ║   C: rechts rückwärts diagonal         ║
-        ║                                        ║
-        ║   Rotation:                            ║
-        ║   J: links drehen                      ║
-        ║   L: rechts drehen                     ║
-        ║                                        ║
-        ║   Geschwindigkeit:                     ║
-        ║   +: schneller                         ║
-        ║   -: langsamer                         ║
-        ║                                        ║
-        ║   SPACE: Stopp                         ║
-        ║   ESC/Ctrl+C: Beenden                  ║
-        ║                                        ║
-        ╚════════════════════════════════════════╝
+        ╔════════════════════════════════════╗
+        ║   ROSBOT KEYBOARD TELEOPERATION    ║
+        ╠════════════════════════════════════╣
+        ║                                    ║
+        ║   Movement (Omniwheel):            ║
+        ║                                    ║
+        ║        W (forward)                 ║
+        ║        ↑                           ║
+        ║   A ← + → D                        ║
+        ║        ↓                           ║
+        ║        S (backward)                ║
+        ║                                    ║
+        ║   Q: left forward diagonal         ║
+        ║   E: right forward diagonal        ║
+        ║   Z: left backward diagonal        ║
+        ║   C: right backward diagonal       ║
+        ║                                    ║
+        ║   Rotation:                        ║
+        ║   J: turn left                     ║
+        ║   L: turn right                    ║
+        ║                                    ║
+        ║   Speed:                           ║
+        ║   +: faster                        ║
+        ║   -: slower                        ║
+        ║                                    ║
+        ║   SPACE: Stop                      ║
+        ║   ESC/Ctrl+C: End                  ║
+        ║                                    ║
+        ╚════════════════════════════════════╝
         """
         print(msg)
         self.print_status()
@@ -67,10 +67,10 @@ class TeleopKeyboardNode(Node):
     def print_status(self):
         """Print the current speed and movement status."""
         print(
-            f'\nGeschwindigkeit: linear={self.linear_speed:.2f} m/s, '
+            f'\Speed: linear={self.linear_speed:.2f} m/s, '
             f'angular={self.angular_speed:.2f} rad/s')
         print(
-            f'Aktuell: vx={self.current_linear_x:.2f}, '
+            f'Current: vx={self.current_linear_x:.2f}, '
             f'vy={self.current_linear_y:.2f}, '
             f'w={self.current_angular_z:.2f}')
 
@@ -103,65 +103,65 @@ class TeleopKeyboardNode(Node):
             while rclpy.ok():
                 key = self.get_key()
 
-                # Bewegung
+                # movement commands
                 if key in ('w', 'W'):
                     self.publish_twist(linear_x=self.linear_speed)
-                    print('↑ Vorwärts')
+                    print('↑ forward')
                 elif key in ('s', 'S'):
                     self.publish_twist(linear_x=-self.linear_speed)
-                    print('↓ Rückwärts')
+                    print('↓ backward')
                 elif key in ('a', 'A'):
                     self.publish_twist(linear_y=self.linear_speed)
-                    print('← Links')
+                    print('← left')
                 elif key in ('d', 'D'):
                     self.publish_twist(linear_y=-self.linear_speed)
-                    print('→ Rechts')
-                # Diagonale Bewegung
+                    print('→ right')
+                # Diagonal movement
                 elif key in ('q', 'Q'):
                     self.publish_twist(
                         linear_x=self.linear_speed,
                         linear_y=self.linear_speed)
-                    print('↖ Links vorwärts')
+                    print('↖ left forward')
                 elif key in ('e', 'E'):
                     self.publish_twist(
                         linear_x=self.linear_speed,
                         linear_y=-self.linear_speed)
-                    print('↗ Rechts vorwärts')
+                    print('↗ right forward')
                 elif key in ('z', 'Z'):
                     self.publish_twist(
                         linear_x=-self.linear_speed,
                         linear_y=self.linear_speed)
-                    print('↙ Links rückwärts')
+                    print('↙ left backward')
                 elif key in ('c', 'C'):
                     self.publish_twist(
                         linear_x=-self.linear_speed,
                         linear_y=-self.linear_speed)
-                    print('↘ Rechts rückwärts')
+                    print('↘ right backward')
                 # Rotation
                 elif key in ('j', 'J'):
                     self.publish_twist(angular_z=self.angular_speed)
-                    print('↺ Links drehen')
+                    print('↺ left rotate')
                 elif key in ('l', 'L'):
                     self.publish_twist(angular_z=-self.angular_speed)
-                    print('↻ Rechts drehen')
-                # Geschwindigkeit anpassen
+                    print('↻ right rotate')
+                # Speed adjustment
                 elif key in ('+', '='):
                     self.linear_speed += self.speed_increment
                     self.angular_speed += self.speed_increment
-                    print(f'Schneller: {self.linear_speed:.2f} m/s')
+                    print(f'faster: {self.linear_speed:.2f} m/s')
                 elif key in ('-', '_'):
                     self.linear_speed = max(
                         0.1, self.linear_speed - self.speed_increment)
                     self.angular_speed = max(
                         0.1, self.angular_speed - self.speed_increment)
-                    print(f'Langsamer: {self.linear_speed:.2f} m/s')
+                    print(f'slower: {self.linear_speed:.2f} m/s')
                 # Stopp
                 elif key == ' ':
                     self.publish_twist()
-                    print('⏹ STOPP')
+                    print('⏹ STOP')
                 # Beenden
                 elif key in ('\x1b', '\x03'):  # ESC oder Ctrl+C
-                    print('\nBeende...')
+                    print('\nEnding...')
                     break
                 # Hilfe
                 elif key in ('h', 'H'):
@@ -170,7 +170,7 @@ class TeleopKeyboardNode(Node):
         except Exception as e:
             self.get_logger().error(f'Fehler: {e}')
         finally:
-            # Stoppe Roboter beim Beenden
+            # Stop robot when ending
             self.publish_twist()
 
 
