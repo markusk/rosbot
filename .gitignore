@@ -130,7 +130,7 @@ dmypy.json
 # ROS individual staff
 ROS/catkin_workspace/src/CMakeLists.txt
 # Visual Code Studio settings
-.vscode/settings.json
+.vscode/
 # RVR Firmare check file
 .fw
 # Symbolic Link to the Sphero SDK
