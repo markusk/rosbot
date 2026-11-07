@@ -5,6 +5,7 @@ from geometry_msgs.msg import Twist
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Joy
+from std_msgs.msg import Bool
 
 
 class TeleopJoystickNode(Node):
@@ -35,7 +36,10 @@ class TeleopJoystickNode(Node):
             int(self.get_parameter('stop_button').value),
             int(self.get_parameter('alternate_stop_button').value),
         )
-        self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
+        self.publisher = self.create_publisher(
+            Twist, 'joystick_cmd_vel', 10)
+        self.stop_publisher = self.create_publisher(
+            Bool, 'joystick_stop', 10)
         self.subscription = self.create_subscription(
             Joy, 'joy', self.joy_callback, 10)
         self.get_logger().info('Joystick teleoperation is ready')
@@ -55,10 +59,16 @@ class TeleopJoystickNode(Node):
 
     def joy_callback(self, msg):
         """Publish a Twist command for the latest joystick message."""
+        stop_pressed = self._button_pressed(msg.buttons, self.stop_buttons)
+        if stop_pressed:
+            self.stop_publisher.publish(Bool(data=True))
+            return
+
         twist = Twist()
-        if not self._button_pressed(msg.buttons, self.stop_buttons):
-            twist.linear.x = self._axis_value(msg.axes, self.forward_axes) * self.linear_speed
-            twist.angular.z = self._axis_value(msg.axes, self.turn_axes) * self.angular_speed
+        twist.linear.x = (
+            self._axis_value(msg.axes, self.forward_axes) * self.linear_speed)
+        twist.angular.z = (
+            self._axis_value(msg.axes, self.turn_axes) * self.angular_speed)
         self.publisher.publish(twist)
 
 
@@ -71,7 +81,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node.publisher.publish(Twist())
+        node.stop_publisher.publish(Bool(data=True))
         node.destroy_node()
         rclpy.shutdown()
 

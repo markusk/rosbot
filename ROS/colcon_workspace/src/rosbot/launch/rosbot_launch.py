@@ -25,6 +25,19 @@ def generate_launch_description():
         ),
         Node(
             package='rosbot',
+            executable='TeleopArbitratorNode',
+            name='teleop_arbitrator',
+            output='screen',
+        ),
+        Node(
+            package='rosbot',
+            executable='TeleopKeyboardNode',
+            name='teleop_keyboard',
+            output='screen',
+            emulate_tty=True,
+        ),
+        Node(
+            package='rosbot',
             executable='TeleopJoystickNode',
             name='teleop_joystick',
             condition=IfCondition(joystick_enabled),

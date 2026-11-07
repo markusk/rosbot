@@ -22,6 +22,7 @@ setup(
             'MotorControllerNode = rosbot.MotorControllerNode:main',
             'TeleopKeyboardNode = rosbot.TeleopKeyboardNode:main',
             'TeleopJoystickNode = rosbot.TeleopJoystickNode:main',
+            'TeleopArbitratorNode = rosbot.TeleopArbitratorNode:main',
         ],
     },
     data_files=[
