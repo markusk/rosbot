@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import socket
-
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.conditions import IfCondition
@@ -43,13 +41,6 @@ def generate_launch_description():
             condition=IfCondition(joystick_enabled),
             output='screen',
         ),
-#        Node(
-#            package='rosbot',
-#            executable='LEDPWMNode',
-#            name='led_pwm',
-#            output='screen',
-#            emulate_tty=True,
-#        ),
         Node(
             package='joy',
             executable='joy_node',
@@ -62,18 +53,18 @@ def generate_launch_description():
         ),
     ]
 
-#    if socket.gethostname() == 'rosbot':
-#        nodes.append(
-#            Node(
-#                package='joy',
-#                executable='joy_node',
-#                name='joy_node',
-#                parameters=[{
-#                    'device_id': ParameterValue(joy_device_id, value_type=int),
-#                }],
-#                condition=IfCondition(joystick_enabled),
-#                output='screen',
-#            )
-#        )
+    # if socket.gethostname() == 'rosbot':
+    #     nodes.append(
+    #         Node(
+    #             package='joy',
+    #             executable='joy_node',
+    #             name='joy_node',
+    #             parameters=[{
+    #                 'device_id': ParameterValue(joy_device_id, value_type=int),
+    #             }],
+    #             condition=IfCondition(joystick_enabled),
+    #             output='screen',
+    #         )
+    #     )
 
     return LaunchDescription(nodes)

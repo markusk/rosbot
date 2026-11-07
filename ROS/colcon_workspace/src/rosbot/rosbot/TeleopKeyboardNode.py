@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import sys
 import termios
 import tty
 
@@ -21,6 +20,7 @@ class TeleopKeyboardNode(Node):
         self.linear_speed = 0.5  # m/s
         self.angular_speed = 1.0  # rad/s
         self.speed_increment = 0.1
+        self.input_terminal = None
 
         # Current speeds
         self.current_linear_x = 0.0
@@ -76,12 +76,14 @@ class TeleopKeyboardNode(Node):
             f'w={self.current_angular_z:.2f}')
 
     def get_key(self):
-        """Read one character from the keyboard."""
-        fd = sys.stdin.fileno()
+        """Read one character from the controlling terminal."""
+        if self.input_terminal is None:
+            self.input_terminal = open('/dev/tty', encoding='utf-8')
+        fd = self.input_terminal.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
             tty.setraw(fd)
-            key = sys.stdin.read(1)
+            key = self.input_terminal.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return key
@@ -173,6 +175,8 @@ class TeleopKeyboardNode(Node):
         finally:
             # Stop robot when ending
             self.publish_twist()
+            if self.input_terminal is not None:
+                self.input_terminal.close()
 
 
 def main(args=None):
