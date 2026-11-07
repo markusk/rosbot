@@ -43,13 +43,13 @@ def generate_launch_description():
             condition=IfCondition(joystick_enabled),
             output='screen',
         ),
-        Node(
-            package='rosbot',
-            executable='LEDPWMNode',
-            name='led_pwm',
-            output='screen',
-            emulate_tty=True,
-        ),
+#        Node(
+#            package='rosbot',
+#            executable='LEDPWMNode',
+#            name='led_pwm',
+#            output='screen',
+#            emulate_tty=True,
+#        ),
         Node(
             package='joy',
             executable='joy_node',
