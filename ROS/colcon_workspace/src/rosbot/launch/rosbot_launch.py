@@ -50,20 +50,30 @@ def generate_launch_description():
             output='screen',
             emulate_tty=True,
         ),
+        Node(
+            package='joy',
+            executable='joy_node',
+            name='joy_node',
+            parameters=[{
+                'device_id': ParameterValue(joy_device_id, value_type=int),
+            }],
+            condition=IfCondition(joystick_enabled),
+            output='screen',
+        ),
     ]
 
-    if socket.gethostname() == 'rosbot':
-        nodes.append(
-            Node(
-                package='joy',
-                executable='joy_node',
-                name='joy_node',
-                parameters=[{
-                    'device_id': ParameterValue(joy_device_id, value_type=int),
-                }],
-                condition=IfCondition(joystick_enabled),
-                output='screen',
-            )
-        )
+#    if socket.gethostname() == 'rosbot':
+#        nodes.append(
+#            Node(
+#                package='joy',
+#                executable='joy_node',
+#                name='joy_node',
+#                parameters=[{
+#                    'device_id': ParameterValue(joy_device_id, value_type=int),
+#                }],
+#                condition=IfCondition(joystick_enabled),
+#                output='screen',
+#            )
+#        )
 
     return LaunchDescription(nodes)
