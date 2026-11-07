@@ -88,6 +88,8 @@ ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
 
 On a Mac, the launch file intentionally does not start the Linux `joy_node`; run the teleop node and publish test messages to `/joy`, or publish commands directly to `/cmd_vel`.
 
+Pressing `ESC` in the keyboard teleoperation terminal stops the robot and shuts down the entire launch, including the motor, joystick, and arbitration nodes. `Ctrl+C` in the launch terminal also shuts down all launched nodes.
+
 ### Einzelne Nodes starten
 
 **Motor Controller:**

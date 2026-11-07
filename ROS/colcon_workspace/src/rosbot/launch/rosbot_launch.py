@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
+from launch.actions import EmitEvent
+from launch.actions import RegisterEventHandler
+from launch.actions import Shutdown
 from launch.conditions import IfCondition
+from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -11,9 +15,26 @@ def generate_launch_description():
     """Describe the core robot nodes and optional joystick input."""
     joystick_enabled = LaunchConfiguration('joystick_enabled')
     joy_device_id = LaunchConfiguration('joy_device_id')
+    keyboard_node = Node(
+        package='rosbot',
+        executable='TeleopKeyboardNode',
+        name='teleop_keyboard',
+        output='screen',
+        emulate_tty=True,
+    )
     nodes = [
         DeclareLaunchArgument('joystick_enabled', default_value='false'),
         DeclareLaunchArgument('joy_device_id', default_value='0'),
+        RegisterEventHandler(
+            OnProcessExit(
+                target_action=keyboard_node,
+                on_exit=[
+                    EmitEvent(
+                        event=Shutdown(
+                            reason='Keyboard teleoperation exited')),
+                ],
+            ),
+        ),
         Node(
             package='rosbot',
             executable='MotorControllerNode',
@@ -27,13 +48,7 @@ def generate_launch_description():
             name='teleop_arbitrator',
             output='screen',
         ),
-        Node(
-            package='rosbot',
-            executable='TeleopKeyboardNode',
-            name='teleop_keyboard',
-            output='screen',
-            emulate_tty=True,
-        ),
+        keyboard_node,
         Node(
             package='rosbot',
             executable='TeleopJoystickNode',
