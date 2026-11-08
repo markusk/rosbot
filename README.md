@@ -1,111 +1,24 @@
 # rosbot
 
-A ROS Python package for my rosbot - running on a Raspberry Pi.
+ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry Pi. The active package targets ROS 2 Jazzy and is located at `ROS/colcon_workspace/src/rosbot`. The `ROS/rosbot.old__TMP!__migrating_to_ros2_!/` directory is a legacy ROS 1 archive; its nodes and launch files are not used by the ROS 2 build.
 
-_Please note: this code is still in the middle of the development process!_
+## Requirements
 
-[![GitHub issues](https://img.shields.io/github/issues/markusk/rosbot)](https://github.com/markusk/rosbot/issues) [![GitHub stars](https://img.shields.io/github/stars/markusk/rosbot)](https://github.com/markusk/rosbot/stargazers) [![GitHub license](https://img.shields.io/github/license/markusk/rosbot)](https://github.com/markusk/rosbot/blob/master/LICENSE)
+- ROS 2 Jazzy installed on Ubuntu on the Raspberry Pi. See the [ROS 2 Raspberry Pi installation guide](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html).
+- `colcon` and `rosdep`.
+- pigpio and its Python package for Raspberry Pi GPIO control.
+- For joystick control: a supported gamepad and the ROS 2 `joy` package.
 
----
+## Step 1: Clone and build
 
-## Step 1: Setup Raspberry with Ubuntu
-
-- Install Ubuntu Desktop ([Instruction](https://ubuntu.com/desktop/)).
-
-
-### Download and install pigpio
-https://abyz.me.uk/rpi/pigpio/download.html
-(See detailed instructions there - will be installed to /usr/local/lib and /usr/local/bin)
-
-### clone this repository
-https://github.com/markusk/rosbot
+Clone this repository:
 
 ```bash
 git clone https://github.com/markusk/rosbot.git
 cd rosbot
 ```
 
-## Step 2: Setting up pigpiod for autostart with systemd
-```bash
-sudo cp raspi/etc__systemd__system__rosbot-boot.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable rosbot-boot.service
-sudo systemctl start rosbot-boot.service
-```
-
-## Step 3: Joystick/Gamepad OS support
-```bash
-sudo apt-get install joystick
-```
-
-### Microsoft XBOX Wireless Controller
-- Supported by the Kernel - if used with the USB connector.
-
-### Gamepad/Joystick test
-- Connect a Gamepad to the Pi, start the following command and press any buttons or move some axes:
-```bash
-jstest --normal /dev/input/js0
-```
-
-
-## Step 3: ROS 2
-
-- Install ROS  on your Raspberry Pi ([Instruction](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html)):
-
-- Install ROS packages (+++ TO BE DEFINED !!! +++):
-
-- Do not forget to "autostart" ros; i.e. in your terminal, when logging in:
-```bash
-echo 'source /opt/ros/jazzy/setup.bash' >> ~/.bashrc
-```
-
-## Step 5: Create a central place for this repository
-
-- Create your own development directory "develop"
-
-```bash
-mkdir ~/develop
-cd ~/develop
-```
-
-- Clone this repository
-
-```bash
-git clone https://github.com/markusk/rvr.git
-```
-
-- Create a colcon workspace (ROS 2) _with_ 'src' subfolder:
-
-```bash
-mkdir -p ~/ros2_ws/src
-```
-
-- Create symbolic link with the name of each ros package from this repository, pointing into the 'src' folder from your ROS/colcon workspace (ros_ws):
-
-```bash
-cd ~/ros2_ws/src
-ln -s ~/develop/rosbot/ROS/colcon_workspace/src/rosbot rosbot
-ln -s ~/develop/rosbot/ROS/colcon_workspace/src/testbot testbot
-```
-
-- Now also source your ROS workspace you created:
-```bash
-echo 'source ~/ros2_ws/install/setup.bash' >> ~/.bashrc
-```
-
-- Build the ROS rosbot package
-```bash
-cd ~/ros2_ws
-colcon build --symlink-install
-source install/setup.bash
-```
-
-
-## Step 4: Build and run ROS 2
-
-Install ROS 2 Jazzy and the Raspberry Pi dependencies using the official [ROS 2 Raspberry Pi guide](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html). The active ROS 2 package is `ROS/colcon_workspace/src/rosbot`; `ROS/rosbot.old__TMP!__migrating_to_ros2_!` is a non-buildable ROS 1 archive and its launch files must not be used with ROS 2.
-
-From the repository root:
+Source ROS 2 and install the package dependencies, build, then source the workspace:
 
 ```bash
 source /opt/ros/jazzy/setup.bash
@@ -115,20 +28,83 @@ colcon build --symlink-install --packages-select rosbot
 source install/setup.bash
 ```
 
-On the Raspberry Pi, install/start pigpio before launching hardware nodes:
+After a reboot or in every new terminal, source both environments again before using ROS 2 commands:
 
 ```bash
-sudo apt-get install pigpio python3-pigpio
-sudo systemctl enable --now pigpiod
-ros2 launch rosbot rosbot_launch.py
+source /opt/ros/jazzy/setup.bash
+cd ~/rosbot/ROS/colcon_workspace
+source install/setup.bash
 ```
 
-The joystick is optional and disabled by default. On the Pi with a controller attached, use:
+This project builds directly in its repository workspace; no symlink to a separate ROS workspace is required.
+
+## Step 2: Configure the Raspberry Pi
+
+### Set the robot hostname
+
+Motor GPIO access is enabled only when the system hostname is exactly `rosbot`. Set and verify it on the Raspberry Pi, then reboot if the hostname changed:
+
+```bash
+sudo hostnamectl set-hostname rosbot
+hostname
+```
+
+If the hostname is anything other than `rosbot`, the motor node runs without accessing GPIO hardware.
+
+### Step 2.1: Install and autostart pigpio
+
+Install pigpio and its Python binding:
+
+```bash
+sudo apt-get update
+sudo apt-get install pigpio python3-pigpio
+```
+
+This repository includes a systemd unit for installations where the daemon is at `/usr/local/bin/pigpiod`:
+
+```bash
+sudo cp raspi/etc__systemd__system__rosbot-boot.service /etc/systemd/system/rosbot-boot.service
+sudo systemctl daemon-reload
+sudo systemctl enable --now rosbot-boot.service
+sudo systemctl status rosbot-boot.service
+```
+
+The unit starts pigpiod at boot and restarts it if it fails. If pigpio was installed from the Ubuntu package and its daemon is not at `/usr/local/bin/pigpiod`, use the package-provided `pigpiod` systemd service instead:
+
+```bash
+sudo systemctl enable --now pigpiod
+sudo systemctl status pigpiod
+```
+
+### Step 2.2: Set up a Linux joystick/gamepad
+
+Install the Linux joystick utilities, connect the gamepad, and verify that Linux sees it:
+
+```bash
+sudo apt-get install joystick
+jstest --normal /dev/input/js0
+```
+
+The ROS 2 `joy` package is a dependency of the `rosbot` package and is installed by `rosdep`. Joystick launch is optional and disabled by default; enable it on Linux with:
 
 ```bash
 ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
 ```
 
-The launch setup checks that the hostname is exactly `rosbot` before starting the Linux joystick device node. Motor and LED GPIO access is also enabled only on that hostname; on a Mac, the hardware nodes simulate/no-op. To exercise joystick mapping without a device, publish `sensor_msgs/Joy` to `/joy`; to exercise the motor command interface, publish `geometry_msgs/Twist` to `/cmd_vel`.
+`joy_device_id` selects the joystick index (`0` uses the first device, normally `/dev/input/js0`). The launch starts the ROS 2 `joy_node` and joystick teleoperation, alongside the motor controller, velocity-command arbitrator, and keyboard teleoperation. Press `ESC` in the keyboard teleoperation terminal or `Ctrl+C` in the launch terminal to stop the launch.
 
-For package details, migrated functionality, parameters, and hardware limitations, see `ROS/colcon_workspace/src/rosbot/README.md`. The ROS 1 `roslaunch`, `catkin_ws`, and `ROS_MASTER_URI` instructions formerly in this README are obsolete and are not supported by the active package.
+For keyboard-only operation, leave joystick support disabled:
+
+```bash
+ros2 launch rosbot rosbot_launch.py
+```
+
+## Step 3: Run and test
+
+On a machine with ROS 2 sourced and the workspace built, run the normal launch. On non-robot hosts, motor output is simulated rather than written to GPIO. To publish a test velocity command:
+
+```bash
+ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
+```
+
+The ROS 2 package README documents node topics, joystick mappings, and known motor-controller limitations: `ROS/colcon_workspace/src/rosbot/README.md`.
