@@ -67,6 +67,7 @@ sudo cp raspi/etc__systemd__system__rosbot-boot.service /etc/systemd/system/rosb
 sudo systemctl daemon-reload
 sudo systemctl enable --now rosbot-boot.service
 sudo systemctl status rosbot-boot.service
+pigs t
 ```
 
 The unit starts pigpiod at boot and restarts it if it fails. If pigpio was installed from the Ubuntu package and its daemon is not at `/usr/local/bin/pigpiod`, use the package-provided `pigpiod` systemd service instead:
@@ -74,6 +75,7 @@ The unit starts pigpiod at boot and restarts it if it fails. If pigpio was insta
 ```bash
 sudo systemctl enable --now pigpiod
 sudo systemctl status pigpiod
+pigs t
 ```
 
 ### Step 2.2: Set up a Linux joystick/gamepad
@@ -107,4 +109,4 @@ On a machine with ROS 2 sourced and the workspace built, run the normal launch. 
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
 ```
 
-The ROS 2 package README documents node topics, joystick mappings, and known motor-controller limitations: `ROS/colcon_workspace/src/rosbot/README.md`.
+The ROS 2 package README documents node topics, L298N BCM pin assignments, joystick mappings, and hardware limitations: `ROS/colcon_workspace/src/rosbot/README.md`.

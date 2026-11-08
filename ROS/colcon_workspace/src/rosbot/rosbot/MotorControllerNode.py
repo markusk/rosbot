@@ -6,42 +6,125 @@ import rclpy
 from rclpy.node import Node
 
 
+FRONT_LEFT_IN_A_GPIO_BCM = 5  # Front-left L298N direction input A
+FRONT_LEFT_IN_B_GPIO_BCM = 6  # Front-left L298N direction input B
+FRONT_LEFT_ENABLE_GPIO_BCM = 12  # Front-left L298N enable/PWM input
+
+FRONT_RIGHT_IN_A_GPIO_BCM = 20  # Front-right L298N direction input A
+FRONT_RIGHT_IN_B_GPIO_BCM = 21  # Front-right L298N direction input B
+FRONT_RIGHT_ENABLE_GPIO_BCM = 13  # Front-right L298N enable/PWM input
+
+REAR_LEFT_IN_A_GPIO_BCM = 23  # Rear-left L298N direction input A
+REAR_LEFT_IN_B_GPIO_BCM = 24  # Rear-left L298N direction input B
+REAR_LEFT_ENABLE_GPIO_BCM = 18  # Rear-left L298N enable/PWM input
+
+REAR_RIGHT_IN_A_GPIO_BCM = 16  # Rear-right L298N direction input A
+REAR_RIGHT_IN_B_GPIO_BCM = 26  # Rear-right L298N direction input B
+REAR_RIGHT_ENABLE_GPIO_BCM = 19  # Rear-right L298N enable/PWM input
+
+MOTOR_PIN_CONFIG = (
+    (
+        'front_left',
+        FRONT_LEFT_IN_A_GPIO_BCM,
+        FRONT_LEFT_IN_B_GPIO_BCM,
+        FRONT_LEFT_ENABLE_GPIO_BCM,
+    ),
+    (
+        'front_right',
+        FRONT_RIGHT_IN_A_GPIO_BCM,
+        FRONT_RIGHT_IN_B_GPIO_BCM,
+        FRONT_RIGHT_ENABLE_GPIO_BCM,
+    ),
+    (
+        'rear_left',
+        REAR_LEFT_IN_A_GPIO_BCM,
+        REAR_LEFT_IN_B_GPIO_BCM,
+        REAR_LEFT_ENABLE_GPIO_BCM,
+    ),
+    (
+        'rear_right',
+        REAR_RIGHT_IN_A_GPIO_BCM,
+        REAR_RIGHT_IN_B_GPIO_BCM,
+        REAR_RIGHT_ENABLE_GPIO_BCM,
+    ),
+)
+
+
+class MotorChannel:
+    """Control one L298N channel with direction pins and enable PWM."""
+
+    PWM_RANGE = 255
+    MINIMUM_DUTY = 0.02
+
+    def __init__(self, pi, in_a, in_b, enable, output_mode, pwm_frequency=1000):
+        self.pi = pi
+        self.in_a = in_a
+        self.in_b = in_b
+        self.enable = enable
+
+        for pin in (self.in_a, self.in_b, self.enable):
+            self.pi.set_mode(pin, output_mode)
+            self.pi.write(pin, 0)
+
+        self.pi.set_PWM_range(self.enable, self.PWM_RANGE)
+        self.pi.set_PWM_frequency(self.enable, pwm_frequency)
+        self.pi.set_PWM_dutycycle(self.enable, 0)
+
+    def set_speed(self, value):
+        value = max(-1.0, min(1.0, value))
+        if abs(value) < self.MINIMUM_DUTY:
+            self.stop()
+            return
+
+        self.pi.set_PWM_dutycycle(self.enable, 0)
+        if value > 0:
+            self.pi.write(self.in_a, 1)
+            self.pi.write(self.in_b, 0)
+        else:
+            self.pi.write(self.in_a, 0)
+            self.pi.write(self.in_b, 1)
+
+        duty = round(abs(value) * self.PWM_RANGE)
+        self.pi.set_PWM_dutycycle(self.enable, duty)
+
+    def stop(self):
+        self.pi.set_PWM_dutycycle(self.enable, 0)
+        self.pi.write(self.in_a, 0)
+        self.pi.write(self.in_b, 0)
+
+
 class MotorControllerNode(Node):
     def __init__(self):
         super().__init__('MotorControllerNode')
         self.get_logger().info('Motor controller node started')
 
-        # GPIO pins for the 4 motors (PWM)
-        self.MOTOR_FL_PIN = 4  # front left
-        self.MOTOR_FR_PIN = 5  # front right
-        self.MOTOR_RL_PIN = 6  # rear left
-        self.MOTOR_RR_PIN = 7  # rear right
-
-        # direction pins (optional, if using a H-Bridge)
-        # Can be added later
-
         self.hostname = socket.gethostname()
         self.pi = None
+        self.motors = []
 
-        # Connection to Raspberry Pi
         if self.hostname == 'rosbot':
             import pigpio
 
+            self.get_logger().info('Connecting to pigpio daemon...')
             self.pi = pigpio.pi()
-            self.get_logger().info('Connecting to Raspberry Pi...')
             if not self.pi.connected:
-                self.get_logger().error(
-                    'ERR: Connection to pigpio daemon failed. '
-                    'Please ensure pigpio is running on the Raspberry Pi.')
-                exit()
+                self.pi.stop()
+                raise RuntimeError(
+                    'Cannot connect to pigpiod. Start the daemon and verify '
+                    'the installation before launching the motor controller.')
 
-            # set PWM frequency (i.e. 1000 Hz)
-            self.pi.set_PWM_frequency(self.MOTOR_FL_PIN, 1000)
-            self.pi.set_PWM_frequency(self.MOTOR_FR_PIN, 1000)
-            self.pi.set_PWM_frequency(self.MOTOR_RL_PIN, 1000)
-            self.pi.set_PWM_frequency(self.MOTOR_RR_PIN, 1000)
+            self.motors = [
+                MotorChannel(
+                    self.pi,
+                    in_a=in_a,
+                    in_b=in_b,
+                    enable=enable,
+                    output_mode=pigpio.OUTPUT,
+                )
+                for _, in_a, in_b, enable in MOTOR_PIN_CONFIG
+            ]
+            self.get_logger().info('L298N motor channels initialised')
 
-            self.get_logger().info('Motors initialised')
         else:
             msg = """
             ╔═══════════════════════════════╗
@@ -65,11 +148,7 @@ class MotorControllerNode(Node):
         self.linear_y = 0.0
         self.angular_z = 0.0
 
-        # motor speeds (0-255)
-        self.motor_fl = 0
-        self.motor_fr = 0
-        self.motor_rl = 0
-        self.motor_rr = 0
+        self.wheel_speeds = [0.0, 0.0, 0.0, 0.0]
 
         # robot parameters (can be adjusted based on the actual robot dimensions)
         self.wheel_base = 0.2   # Distance between front and rear axles (m)
@@ -91,8 +170,11 @@ class MotorControllerNode(Node):
             self.get_logger().info(
                 f'Simulation - vx: {self.linear_x:.2f}, '
                 f'vy: {self.linear_y:.2f}, '
-                f'w: {self.angular_z:.2f} | Motors: FL={self.motor_fl}, '
-                f'FR={self.motor_fr}, RL={self.motor_rl}, RR={self.motor_rr}')
+                f'w: {self.angular_z:.2f} | Wheel commands: '
+                f'FL={self.wheel_speeds[0]:.2f}, '
+                f'FR={self.wheel_speeds[1]:.2f}, '
+                f'RL={self.wheel_speeds[2]:.2f}, '
+                f'RR={self.wheel_speeds[3]:.2f}')
 
     def calculate_motor_speeds(self):
         """
@@ -123,37 +205,30 @@ class MotorControllerNode(Node):
             rl /= max_val
             rr /= max_val
 
-        # convert to PWM values (0-255)
-        self.motor_fl = int(abs(fl) * 255)
-        self.motor_fr = int(abs(fr) * 255)
-        self.motor_rl = int(abs(rl) * 255)
-        self.motor_rr = int(abs(rr) * 255)
-
-        # TODO: take direction into account (sign of fl, fr, rl, rr)
-        # This requires additional GPIO pins for direction control
+        self.wheel_speeds = [fl, fr, rl, rr]
 
     def set_motor_pwm(self):
-        """Set PWM values for all motors."""
+        """Apply signed wheel commands to L298N direction and PWM channels."""
         if self.hostname == 'rosbot' and self.pi:
-            self.pi.set_PWM_dutycycle(self.MOTOR_FL_PIN, self.motor_fl)
-            self.pi.set_PWM_dutycycle(self.MOTOR_FR_PIN, self.motor_fr)
-            self.pi.set_PWM_dutycycle(self.MOTOR_RL_PIN, self.motor_rl)
-            self.pi.set_PWM_dutycycle(self.MOTOR_RR_PIN, self.motor_rr)
+            for motor, speed in zip(self.motors, self.wheel_speeds):
+                motor.set_speed(speed)
+
+    def stop_all(self):
+        """Stop every motor channel."""
+        for motor in self.motors:
+            motor.stop()
+        self.wheel_speeds = [0.0, 0.0, 0.0, 0.0]
 
     def stop_motors(self):
         """Stop all motors."""
-        self.motor_fl = 0
-        self.motor_fr = 0
-        self.motor_rl = 0
-        self.motor_rr = 0
-        self.set_motor_pwm()
+        self.stop_all()
         self.get_logger().info('All motors stopped')
 
     def destroy_node(self):
-        """Clean up hardware resources before shutting down."""
+        """Clean up motor channels and pigpio connection."""
         if self.hostname == 'rosbot' and self.pi:
             self.get_logger().info('Stopping motors and shutting down...')
-            self.stop_motors()
+            self.stop_all()
             self.pi.stop()
         super().destroy_node()
 

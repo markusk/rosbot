@@ -13,23 +13,32 @@ The active package is `ROS/colcon_workspace/src/rosbot`. The directory `ROS/rosb
 | Xbox/D-pad joystick input | Migrated to `TeleopJoystickNode`, publishing `cmd_vel` from validated `sensor_msgs/Joy` axes/buttons. |
 | ROS 1 motor services | Not migrated: both old service servers are logging/placeholders, and the ROS 2 motor node uses PWM directly. |
 | Sphero RVR odometry and battery | Not migrated: legacy odometry is an incomplete prototype and battery code is a standalone SDK script, not a ROS publisher. They require confirmed hardware, SDK, and frame/units behavior before a safe ROS 2 port. |
-| GPIO LED test | Covered by the existing `LEDPWMNode`. |
+| GPIO LED test | `LEDPWMNode` is retained as a standalone hardware smoke test and is not part of normal robot control. |
 | Empty heading driver and print-only keyboard listener | No independent functionality to migrate. |
 
-GPIO access remains restricted to the host whose hostname is exactly `rosbot`; other hosts use simulation/no hardware access. The joystick device node is likewise only added by the launch file on `rosbot`. On a Mac, joystick commands can be simulated by publishing `sensor_msgs/Joy` to `/joy` or `geometry_msgs/Twist` to `/cmd_vel`.
+Motor GPIO access remains restricted to the host whose hostname is exactly `rosbot`; other hosts use simulation/no hardware access. The joystick device node is for Linux with a connected gamepad. On a Mac, publish test velocity commands to `/keyboard_cmd_vel` or `/joystick_cmd_vel`; do not enable the Linux joystick device node without a supported Linux device.
 
-The existing motor controller currently drives PWM outputs only and discards wheel-command signs. Do not treat reverse/turning hardware behavior as validated until the motor driver's direction wiring and GPIO mapping are confirmed and direction control is implemented.
+## L298N motor hardware
+
+`MotorControllerNode` uses pigpio PWM on the L298N enable pins and digital outputs for direction. GPIO values below are BCM GPIO numbers; the ROS 2 wheel kinematics are unchanged.
+
+| Wheel | IN A | IN B | Enable/PWM |
+| --- | ---: | ---: | ---: |
+| Front left | 5 | 6 | 12 |
+| Front right | 20 | 21 | 13 |
+| Rear left | 23 | 24 | 18 |
+| Rear right | 16 | 26 | 19 |
+
+Remove the ENA/ENB jumpers on both L298N boards when using GPIO-controlled PWM. GPIO 18 is allocated to the rear-left motor enable. `LEDPWMNode` is only a standalone hardware test and must not run while the motor controller is using this pin. The main launch does not start the LED node.
+
+The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands; ROS 2 build and physical motor behavior still need validation on the Raspberry Pi.
 
 ## Nodes
 
 ### 1. MotorControllerNode
 Steuert 4 Motoren über PWM für Omniwheel-Kinematik.
 
-**GPIO-Pins:**
-- GPIO 4: Front Left Motor
-- GPIO 5: Front Right Motor
-- GPIO 6: Rear Left Motor
-- GPIO 7: Rear Right Motor
+**BCM GPIO-Pins:** See the L298N motor pin table in the `L298N motor hardware` section below.
 
 **Subscribed Topics:**
 - `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle
@@ -49,7 +58,7 @@ Tastatursteuerung für den Roboter.
 - `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle
 
 ### 3. LEDPWMNode
-Beispiel-Node für LED-Steuerung (GPIO 18).
+Standalone ROS 2 GPIO smoke test for the LED PWM hardware. It is deliberately excluded from normal robot control. Run only when the motor controller is stopped because its test GPIO 18 is assigned to the rear-left L298N enable input.
 
 ### 4. TeleopJoystickNode
 Consumes `sensor_msgs/Joy` on `/joy` and publishes `geometry_msgs/Twist` on `/cmd_vel`. The default mapping supports the legacy controller axes 5/7 for forward/backward, axes 4/6 for turning, and buttons 10/1 for stop. Axis and button indices plus speeds are ROS parameters, and short or differently sized joystick messages are handled without indexing errors.
@@ -102,7 +111,7 @@ ros2 run rosbot MotorControllerNode
 ros2 run rosbot TeleopKeyboardNode
 ```
 
-**LED Node:**
+**LED PWM hardware smoke test (run with the motor controller stopped):**
 ```bash
 ros2 run rosbot LEDPWMNode
 ```
@@ -122,13 +131,7 @@ ros2 topic pub /cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, 
 ## Konfiguration
 
 ### GPIO-Pins anpassen
-Die GPIO-Pins können in `MotorControllerNode.py` angepasst werden:
-```python
-self.MOTOR_FL_PIN = 4   # Front Left
-self.MOTOR_FR_PIN = 5   # Front Right
-self.MOTOR_RL_PIN = 6   # Rear Left
-self.MOTOR_RR_PIN = 7   # Rear Right
-```
+Die L298N BCM GPIO-Zuordnung kann in `MotorControllerNode.py` in der `self.motors`-Liste angepasst werden. ENA/ENB sind Enable/PWM-Eingänge; Jumper müssen dafür entfernt sein. Der separate LED-Hardwaretest ist kein Teil dieser Pin-Zuordnung und darf nicht gleichzeitig mit dem Motorcontroller laufen.
 
 ### Roboter-Parameter anpassen
 In `MotorControllerNode.py`:
@@ -141,17 +144,9 @@ self.max_speed = 1.0       # Maximale Geschwindigkeit (m/s)
 ## Nächste Schritte
 
 ### TODO:
-1. **Richtungssteuerung hinzufügen**: Zusätzliche GPIO-Pins für Motorrichtung (H-Bridge)
-2. **Joystick-Steuerung**: Node für Joystick-Input erstellen
-3. **Encoder-Feedback**: Geschwindigkeitsregelung mit Encodern
-4. **Odometrie**: Position und Orientierung berechnen
-5. **PID-Regler**: Präzise Geschwindigkeitsregelung
-
-### Joystick-Steuerung (geplant)
-```bash
-# Joystick-Node wird später hinzugefügt
-ros2 run rosbot TeleopJoystickNode
-```
+1. **Encoder-Feedback**: Geschwindigkeitsregelung mit Encodern
+2. **Odometrie**: Position und Orientierung berechnen
+3. **PID-Regler**: Präzise Geschwindigkeitsregelung
 
 ## Troubleshooting
 
