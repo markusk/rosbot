@@ -61,7 +61,7 @@ The correct fixed transform from the robot base frame to `laser` is still requir
 
 Remove the ENA/ENB jumpers on both L298N boards when using GPIO-controlled PWM. GPIO 18 is allocated to the rear-left motor enable. `LEDPWMNode` is only a standalone hardware test and must not run while the motor controller is using this pin. The main launch does not start the LED node.
 
-The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands; ROS 2 build and physical motor behavior still need validation on the Raspberry Pi.
+The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands. The ROS 2 build and package tests have been completed in a Jazzy virtual machine; physical motor behavior still needs validation on the Raspberry Pi.
 
 ## Nodes
 
@@ -179,12 +179,14 @@ self.track_width = 0.2     # Abstand links/rechts (m)
 self.max_speed = 1.0       # Maximale Geschwindigkeit (m/s)
 ```
 
-## Nächste Schritte
+## Nicht implementierte Erweiterungen
 
-### TODO:
-1. **Encoder-Feedback**: Geschwindigkeitsregelung mit Encodern
-2. **Odometrie**: Position und Orientierung berechnen
-3. **PID-Regler**: Präzise Geschwindigkeitsregelung
+Diese Funktionen sind mögliche spätere Erweiterungen und setzen passende Hardware sowie geklärte Einheiten und Koordinatenrahmen voraus:
+
+- Encoder-Feedback für die Radgeschwindigkeit
+- Odometrie für Position und Orientierung
+- PID-Regelung für die Radgeschwindigkeit
+- Batterie-Status als ROS-Topic; die bestehende Legacy-Implementierung ist ein separates SDK-Skript
 
 ## Troubleshooting
 

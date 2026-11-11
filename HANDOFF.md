@@ -2,28 +2,22 @@
 
 ## Current State
 
-The latest repository commit is `7e816b4` (`migrated modules to ROS2`), which added `ROS/rosbot.old__TMP!__migrating_to_ros2_!/launch/alle_launches.txt`. The working tree was clean when reviewed. The prior ROS 2 joystick migration is in commits `cd50e9b` and `6c41554`.
+The active ROS 2 Jazzy package is `ROS/colcon_workspace/src/rosbot`. It provides motor control, keyboard and joystick teleoperation, command arbitration, and a command-velocity watchdog. Optional launch support is available for a Raspberry Pi camera through `camera_ros` and a Hokuyo scanner through `urg_node`. The ROS 1 directory is an archive and is not part of the active colcon build.
 
-## Last Reviewed Work
-
-Reviewed the repository context and current Git state in preparation for adding project notes and a handoff. No software implementation was changed during this review.
+The ROS 2 build and package tests have been completed successfully in a Jazzy virtual machine, as reported by the project owner. Physical motor and sensor behavior has not been verified because the robot is currently unavailable.
 
 ## Relevant Files
 
-- `README.md`: Raspberry Pi and ROS 2 setup/build/launch overview; includes older setup text alongside the current ROS 2 instructions.
+- `README.md`: repository setup, build, and launch instructions.
 - `ROS/colcon_workspace/src/rosbot/README.md`: package behavior, migration status, usage, and hardware limitations.
-- `ROS/colcon_workspace/src/rosbot/rosbot/`: active ROS 2 motor, keyboard, LED, and joystick nodes.
+- `ROS/colcon_workspace/src/rosbot/rosbot/`: active ROS 2 nodes.
 - `ROS/colcon_workspace/src/rosbot/launch/rosbot_launch.py`: package launch entry point.
-- `ROS/colcon_workspace/src/rosbot/test/`: joystick mapping and ament lint tests.
-- `ROS/rosbot.old__TMP!__migrating_to_ros2_!/`: archived ROS 1 implementation; do not treat its ROS 1 launch/service files as active ROS 2 components.
+- `ROS/colcon_workspace/src/rosbot/test/`: package tests.
+- `ROS/rosbot.old__TMP!__migrating_to_ros2_!/`: archived ROS 1 implementation; its ROS 1 launch and service files are not active ROS 2 components.
 
-## Next Steps / Known Issues
+## Remaining Work
 
-- Run a ROS 2 Jazzy `colcon build` and package tests in an environment with ROS 2, ament lint dependencies, and pytest installed; these were unavailable in the previous development environment.
-- Validate the Raspberry Pi launch and GPIO setup on the actual robot before relying on physical motor behavior.
-- Confirm L298N direction wiring, motor polarity, and BCM pin assignments on the physical robot. Keep the standalone LED GPIO test separate from motor operation because its test pin is reserved by the motor mapping.
-- The `cmd_vel_timeout` motor watchdog now defaults to 0.5 seconds; validate timeout and recovery behavior with ROS 2 simulation and later on the Raspberry Pi. It is not a physical emergency stop.
-- Optional Raspberry Pi CSI camera launch uses external `camera_ros`; actual camera module/libcamera compatibility remains to be checked on the Pi. Hokuyo URG-LX04-UG01 is connected over USB and has an optional `urg_node` launch; confirm actual serial path/baud and measure the fixed base-to-laser transform on the Pi.
-- Odometry and battery publishing remain unimplemented in the active ROS 2 package; the legacy code is incomplete and needs hardware/units/frame behavior confirmed before migration.
-- The package README still contains a TODO describing joystick support as planned, although `TeleopJoystickNode` is present; reconcile the stale section.
-- The top-level README contains older workspace/setup steps that overlap with the newer ROS 2 section; reconcile them when documentation cleanup is requested.
+- On the robot, verify L298N wiring, motor order and polarity, BCM pin assignments, wheel layout, and low-speed movement with the wheels raised. The standalone LED GPIO test must not run while the motor controller is active because GPIO 18 is shared.
+- Test the 0.5-second `cmd_vel_timeout` behavior on hardware, including stop and recovery. It is a software fallback, not a physical emergency stop.
+- Verify the installed camera module and libcamera compatibility, Hokuyo serial path and baud rate, and measure the base-to-laser transform. The code supports these devices, but their physical connection and operation are unverified.
+- Encoder feedback, odometry, PID speed control, and battery publishing are not implemented in the active ROS 2 package. Revisit these after confirming the required hardware, units, and coordinate frames.

@@ -26,4 +26,4 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 ## Known Technical Limitations
 
 - Motor directions are now driven through L298N IN pins, but motor polarity, wheel order, the assumed omniwheel/Mecanum-X layout, and physical behavior still require validation on the robot.
-- ROS 2 build and Raspberry Pi hardware operation have not been verified in this project session. The ROS 2 toolchain and pytest were unavailable in the development environment during the prior checks.
+- The ROS 2 build and package tests have been completed successfully in a Jazzy virtual machine, as reported by the project owner. Raspberry Pi hardware behavior remains unverified because the robot is currently unavailable.
