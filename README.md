@@ -8,6 +8,8 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 - `colcon` and `rosdep`.
 - pigpio and its Python package for Raspberry Pi GPIO control.
 - For joystick control: a supported gamepad and the ROS 2 `joy` package.
+- For the Raspberry Pi camera: a camera module supported by libcamera and the ROS 2 `camera_ros` driver.
+- Hokuyo URG-LX04-UG01 over USB serial: ROS 2 `urg_node`, optional in the robot launch; confirm serial port and baud rate on the Pi.
 
 ## Step 1: Clone and build
 
@@ -101,6 +103,30 @@ For keyboard-only operation, leave joystick support disabled:
 ros2 launch rosbot rosbot_launch.py
 ```
 
+On the Raspberry Pi with a supported libcamera camera connected, optionally start its ROS 2 image and camera-info topics with:
+
+```bash
+ros2 launch rosbot rosbot_launch.py camera_enabled:=true
+```
+
+The camera launch is disabled by default and only included when the hostname is exactly `rosbot`. Install the `camera_ros` driver and verify the camera module is supported by the Pi's libcamera version first. The camera connects to the Raspberry Pi's dedicated camera connector.
+
+### Step 2.3: Enable the Hokuyo USB laser
+
+The Hokuyo URG-LX04-UG01 connects to the Raspberry Pi over USB serial. The ROS package dependency installs `urg_node` during the documented `rosdep install` step. The laser launch is disabled by default and is only available when the hostname is exactly `rosbot`. Enable it with:
+
+```bash
+ros2 launch rosbot rosbot_launch.py laser_enabled:=true
+```
+
+The default serial device is `/dev/ttyACM0`; override it with a stable path from `/dev/serial/by-id/` if available:
+
+```bash
+ros2 launch rosbot rosbot_launch.py laser_enabled:=true laser_device:=/dev/serial/by-id/your-hokuyo laser_baud:=115200 laser_frame_id:=laser
+```
+
+The baud rate defaults to `115200`, and the scan frame defaults to `laser`. Confirm the detected port and scanner-supported baud rate on the Raspberry Pi before use. A fixed transform from the robot base to the `laser` frame will be needed for RViz/navigation.
+
 ## Step 3: Run and test
 
 On a machine with ROS 2 sourced and the workspace built, run the normal launch. On non-robot hosts, motor output is simulated rather than written to GPIO. To publish a test velocity command:
@@ -109,4 +135,4 @@ On a machine with ROS 2 sourced and the workspace built, run the normal launch. 
 ros2 topic pub --once /cmd_vel geometry_msgs/msg/Twist "{linear: {x: 0.2}, angular: {z: 0.0}}"
 ```
 
-The ROS 2 package README documents node topics, L298N BCM pin assignments, joystick mappings, and hardware limitations: `ROS/colcon_workspace/src/rosbot/README.md`.
+The ROS 2 package README documents node topics, optional camera and Hokuyo launches, L298N BCM pin assignments, joystick mappings, and hardware limitations: `ROS/colcon_workspace/src/rosbot/README.md`.

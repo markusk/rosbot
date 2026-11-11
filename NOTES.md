@@ -10,7 +10,7 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 - `MotorControllerNode` subscribes to `geometry_msgs/Twist` on `cmd_vel` and controls four L298N channels with pigpio: BCM direction/enable pins FL 5/6/12, FR 20/21/13, RL 23/24/18, RR 16/26/19. Its configurable `cmd_vel_timeout` watchdog stops the motors after missed commands (default 0.5 seconds).
 - `TeleopKeyboardNode` and `TeleopJoystickNode` publish `Twist`; joystick input is `sensor_msgs/Joy` on `joy`.
 - `LEDPWMNode.py` is retained as a standalone ROS hardware smoke test, not as part of the robot motor GPIO mapping. Its test output pin is reserved for that test only and must not be driven while the L298N motor node is active.
-- `launch/rosbot_launch.py` starts the motor controller, teleoperation arbitrator, and keyboard node; joystick support is optional (`joystick_enabled`, default `false`). `LEDPWMNode.py` is not included in the main launch.
+- `launch/rosbot_launch.py` starts the motor controller, teleoperation arbitrator, and keyboard node; joystick, CSI/libcamera camera, and USB-serial Hokuyo support are optional and default off. Camera and laser drivers start only on hostname `rosbot`; `LEDPWMNode.py` is not included in the main launch.
 - Motor GPIO access is guarded by `self.hostname == 'rosbot'`; other hostnames use simulation/no hardware access.
 - `ROS/rosbot.old__TMP!__migrating_to_ros2_!/` is a ROS 1 reference archive, not the active colcon package.
 

@@ -18,6 +18,36 @@ The active package is `ROS/colcon_workspace/src/rosbot`. The directory `ROS/rosb
 
 Motor GPIO access remains restricted to the host whose hostname is exactly `rosbot`; other hosts use simulation/no hardware access. The joystick device node is for Linux with a connected gamepad. On a Mac, publish test velocity commands to `/keyboard_cmd_vel` or `/joystick_cmd_vel`; do not enable the Linux joystick device node without a supported Linux device.
 
+## Raspberry Pi camera
+
+ROS 2 supports the Raspberry Pi camera through the external `camera_ros` driver for libcamera-supported devices. It publishes `sensor_msgs/msg/Image` and `sensor_msgs/msg/CameraInfo`; this project does not contain a custom camera implementation. The actual camera module and Raspberry Pi OS/libcamera compatibility are not yet known and must be checked on the robot.
+
+The main launch includes the camera node only on hostname `rosbot`, and it is disabled by default. Install the `camera_ros` ROS package and enable it with:
+
+```bash
+ros2 launch rosbot rosbot_launch.py camera_enabled:=true
+```
+
+The driver selects its default camera and stream settings when no camera parameters are supplied. View the stream with a ROS image viewer, for example `ros2 run image_view image_view --ros-args --remap image:=/camera/image_raw`. Camera calibration and exact topic names should be verified on the installed driver before using images for geometry or navigation.
+
+## Hokuyo URG-LX04-UG01
+
+The Hokuyo connects to the Raspberry Pi over USB serial. ROS 2 support uses `urg_node`, which publishes `sensor_msgs/msg/LaserScan`. The launch includes this node only on hostname `rosbot` and keeps it disabled by default. The initial defaults are `/dev/ttyACM0`, `115200` baud, and frame `laser`; confirm the actual port and baud on the robot. Prefer the stable device path under `/dev/serial/by-id/` when available.
+
+Enable the scanner after connecting it:
+
+```bash
+ros2 launch rosbot rosbot_launch.py laser_enabled:=true
+```
+
+Override the serial device, baud rate, or scan frame if required:
+
+```bash
+ros2 launch rosbot rosbot_launch.py laser_enabled:=true laser_device:=/dev/serial/by-id/your-hokuyo laser_baud:=115200 laser_frame_id:=laser
+```
+
+The correct fixed transform from the robot base frame to `laser` is still required for RViz/navigation and must be measured from the final mounting position. The exact URG-LX04-UG01 serial baud and device enumeration remain to be confirmed on the Pi.
+
 ## L298N motor hardware
 
 `MotorControllerNode` uses pigpio PWM on the L298N enable pins and digital outputs for direction. GPIO values below are BCM GPIO numbers; the ROS 2 wheel kinematics are unchanged.
@@ -103,7 +133,7 @@ The joystick is disabled by default. On the Raspberry Pi with a joystick connect
 ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
 ```
 
-On a Mac, the launch file intentionally does not start the Linux `joy_node`; run the teleop node and publish test messages to `/joy`, or publish commands directly to `/cmd_vel`.
+On a Mac, the launch file does not start the camera node or access GPIO hardware. The Linux `joy_node` requires a supported Linux joystick device; velocity-command simulation can be tested using `/keyboard_cmd_vel` or `/joystick_cmd_vel`.
 
 Pressing `ESC` in the keyboard teleoperation terminal stops the robot and shuts down the entire launch, including the motor, joystick, and arbitration nodes. `Ctrl+C` in the launch terminal also shuts down all launched nodes.
 
