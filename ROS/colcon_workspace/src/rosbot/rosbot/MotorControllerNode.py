@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 import socket
+import time
 
 from geometry_msgs.msg import Twist
 import rclpy
 from rclpy.node import Node
+
+from rosbot.CmdVelWatchdog import command_timed_out
 
 
 FRONT_LEFT_IN_A_GPIO_BCM = 5  # Front-left L298N direction input A
@@ -98,6 +101,12 @@ class MotorControllerNode(Node):
         super().__init__('MotorControllerNode')
         self.get_logger().info('Motor controller node started')
 
+        self.declare_parameter('cmd_vel_timeout', 0.5)
+        self.cmd_vel_timeout = float(
+            self.get_parameter('cmd_vel_timeout').value)
+        if self.cmd_vel_timeout <= 0.0:
+            raise ValueError('cmd_vel_timeout must be greater than zero')
+
         self.hostname = socket.gethostname()
         self.pi = None
         self.motors = []
@@ -136,7 +145,12 @@ class MotorControllerNode(Node):
             self.get_logger().info(msg)
 #                'Simulation mode - no Raspberry Pi detected')
 
-        # twist subscriber for move commands
+        self.last_cmd_vel_time = None
+        self.watchdog_stopped = True
+        self.watchdog_timer = self.create_timer(
+            min(0.1, self.cmd_vel_timeout / 2),
+            self.check_cmd_vel_timeout,
+        )
         self.subscription = self.create_subscription(
             Twist,
             'cmd_vel',
@@ -156,12 +170,16 @@ class MotorControllerNode(Node):
         self.max_speed = 1.0    # Maximum speed (m/s)
 
     def cmd_vel_callback(self, msg):
+        self.last_cmd_vel_time = time.monotonic()
         self.linear_x = msg.linear.x
         self.linear_y = msg.linear.y
         self.angular_z = msg.angular.z
 
         # calculating wheel speeds for omniwheel kinematics
         self.calculate_motor_speeds()
+
+        if any(self.wheel_speeds):
+            self.watchdog_stopped = False
 
         # Set PWM values
         self.set_motor_pwm()
@@ -175,6 +193,25 @@ class MotorControllerNode(Node):
                 f'FR={self.wheel_speeds[1]:.2f}, '
                 f'RL={self.wheel_speeds[2]:.2f}, '
                 f'RR={self.wheel_speeds[3]:.2f}')
+
+    def check_cmd_vel_timeout(self):
+        """Stop motor outputs once commands have exceeded the timeout."""
+        if self.watchdog_stopped or not command_timed_out(
+            self.last_cmd_vel_time,
+            time.monotonic(),
+            self.cmd_vel_timeout,
+        ):
+            return
+
+        self.linear_x = 0.0
+        self.linear_y = 0.0
+        self.angular_z = 0.0
+        self.stop_all()
+        self.watchdog_stopped = True
+        self.last_cmd_vel_time = None
+        self.get_logger().warning(
+            f'No cmd_vel received for {self.cmd_vel_timeout:.2f} seconds; '
+            'stopping motors')
 
     def calculate_motor_speeds(self):
         """

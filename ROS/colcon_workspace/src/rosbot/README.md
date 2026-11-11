@@ -43,6 +43,14 @@ Steuert 4 Motoren über PWM für Omniwheel-Kinematik.
 **Subscribed Topics:**
 - `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle
 
+The node stops the motors if active velocity commands stop arriving. The `cmd_vel_timeout` parameter defaults to `0.5` seconds and must be greater than zero. Override it at launch, for example:
+
+```bash
+ros2 launch rosbot rosbot_launch.py cmd_vel_timeout:=0.75
+```
+
+This watchdog is a software fallback, not a replacement for a physical emergency stop.
+
 ### 2. TeleopKeyboardNode
 Tastatursteuerung für den Roboter.
 

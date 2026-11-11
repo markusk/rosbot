@@ -22,6 +22,7 @@ Reviewed the repository context and current Git state in preparation for adding 
 - Run a ROS 2 Jazzy `colcon build` and package tests in an environment with ROS 2, ament lint dependencies, and pytest installed; these were unavailable in the previous development environment.
 - Validate the Raspberry Pi launch and GPIO setup on the actual robot before relying on physical motor behavior.
 - Confirm L298N direction wiring, motor polarity, and BCM pin assignments on the physical robot. Keep the standalone LED GPIO test separate from motor operation because its test pin is reserved by the motor mapping.
+- The `cmd_vel_timeout` motor watchdog now defaults to 0.5 seconds; validate timeout and recovery behavior with ROS 2 simulation and later on the Raspberry Pi. It is not a physical emergency stop.
 - Odometry and battery publishing remain unimplemented in the active ROS 2 package; the legacy code is incomplete and needs hardware/units/frame behavior confirmed before migration.
 - The package README still contains a TODO describing joystick support as planned, although `TeleopJoystickNode` is present; reconcile the stale section.
 - The top-level README contains older workspace/setup steps that overlap with the newer ROS 2 section; reconcile them when documentation cleanup is requested.
