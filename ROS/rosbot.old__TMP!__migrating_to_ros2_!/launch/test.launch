@@ -15,6 +15,6 @@ Controls the whole robot and has to run on the "rosbot" (Raspberry Pi).
   <param name="rosbot/drivingSpeed" type="int" value="75" />
   <param name="rosbot/turnSpeed"    type="int" value="90" />
 
-  <!-- Testign the Shero RVR -->
+  <!-- Testing the rosbot -->
   <node name="test" pkg="rosbot" type="test.py" output="screen"/>
 </launch>

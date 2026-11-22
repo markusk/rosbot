@@ -131,7 +131,7 @@ dmypy.json
 ROS/catkin_workspace/src/CMakeLists.txt
 # Visual Code Studio settings
 .vscode/
-# RVR Firmare check file
+# rosbot firmware check file
 .fw
 # Symbolic Link to the Sphero SDK
 lib/*

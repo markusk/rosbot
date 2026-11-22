@@ -2,10 +2,10 @@
 # coding=utf-8
 
 
-""" Control the Sphero RVR with a Gamepad (Microsoft XBox Controller) """
+""" Control the rosbot with a Gamepad (Microsoft XBox Controller) """
 
 #-------------------
-# RVR settings
+# rosbot settings
 #-------------------
 # Valid speed values are 0-255
 driveSpeed = 100
@@ -162,12 +162,12 @@ from time import sleep
 
 # my signal handler
 def sig_handler(_signo, _stack_frame):
-    # turn off RVR LEDs
+    # turn off rosbot LEDs
     turnLEDs(0, 0, 0)
 
-    # close RVR
-    print("Closing conection to RVR...")
-    rvr.close()
+    # close rosbot
+    print("Closing conection to rosbot...")
+    rosbot.close()
     print("...done")
 
     print("\n\ncontrol.py terminated clean.\n")
@@ -181,7 +181,7 @@ signal.signal(signal.SIGTERM, sig_handler)
 
 
 #-------------------
-# RVR stuff
+# rosbot stuff
 #-------------------
 import os
 import sys
@@ -193,14 +193,14 @@ from sphero_sdk import RvrLedGroups
 from sphero_sdk import DriveFlagsBitmask
 
 
-# create the RVR object.
+# create the rosbot object.
 # This also lets the robot do a firmware check every now and then.
-print("Starting RVR observer...")
-rvr = SpheroRvrObserver()
+print("Starting rosbot observer...")
+rosbot = SpheroRvrObserver()
 
 
 def turnLEDs(R, G, B):
-    rvr.led_control.set_all_leds_rgb(R, G, B)
+    rosbot.led_control.set_all_leds_rgb(R, G, B)
     # Delay to show LEDs change
     sleep(1)
 
@@ -208,18 +208,18 @@ def turnLEDs(R, G, B):
 #-------------------------
 # Wake up, Mr. Freeman!
 #-------------------------
-print("Waking up RVR...")
-rvr.wake()
-# Give RVR time to wake up
+print("Waking up rosbot...")
+rosbot.wake()
+# Give rosbot time to wake up
 sleep(2)
 print("...done")
 
 # All LEDs to green
-rvr.led_control.set_all_leds_color(color=Colors.green)
+rosbot.led_control.set_all_leds_color(color=Colors.green)
 
 # reset yaw
 print("Resetting yaw...")
-rvr.reset_yaw()
+rosbot.reset_yaw()
 print("...done")
 
 
@@ -242,25 +242,25 @@ while True:
                 if value:
                     # red butoon
                     if button == 'b':
-                        # arm/disarm RVR
+                        # arm/disarm rosbot
                         if armed == False:
                             armed = True
                             print("+++armed+++")
                             # set all LEDs to red
-                            rvr.led_control.set_all_leds_color(color=Colors.red)
+                            rosbot.led_control.set_all_leds_color(color=Colors.red)
                             sleep(1)
                         else:
                             armed = False
                             print("+++disarmed+++")
                             # set all LEDs to green
-                            rvr.led_control.set_all_leds_color(color=Colors.green)
+                            rosbot.led_control.set_all_leds_color(color=Colors.green)
                             sleep(1)
-                    # RVR armed?
+                    # rosbot armed?
                     if armed:
                         if button == 'dpad_up':
                             print("FORWARD")
                             # drive
-                            rvr.drive_with_heading(
+                            rosbot.drive_with_heading(
                                 speed=driveSpeed,
                                 heading=driveHeading,
                                 flags=DriveFlagsBitmask.none.value
@@ -268,7 +268,7 @@ while True:
                         elif button == 'dpad_down':
                             print("BACKWARD")
                             # drive
-                            rvr.drive_with_heading(
+                            rosbot.drive_with_heading(
                                 speed=driveSpeed,
                                 heading=driveHeading,
                                 flags=DriveFlagsBitmask.drive_reverse.value
@@ -276,7 +276,7 @@ while True:
                         elif button == 'dpad_left':
                             print("LEFT")
                             # drive
-                            rvr.drive_with_heading(
+                            rosbot.drive_with_heading(
                                 speed   = driveSpeed,
                                 heading = 270,
                                 flags=DriveFlagsBitmask.none.value
@@ -284,7 +284,7 @@ while True:
                         elif button == 'dpad_right':
                             print("RIGHT")
                             # drive
-                            rvr.drive_with_heading(
+                            rosbot.drive_with_heading(
                                 speed   = driveSpeed,
                                 heading = 90,
                                 flags=DriveFlagsBitmask.none.value
@@ -293,12 +293,12 @@ while True:
                             print(("%s pressed" % (button)))
                 else:
                     # button released
-                    # RVR armed?
+                    # rosbot armed?
                     if armed:
                         if button == 'dpad_up' or button == 'dpad_down' or button == 'dpad_left' or button == 'dpad_right':
                             print("STOP")
                             # drive
-                            rvr.drive_with_heading(
+                            rosbot.drive_with_heading(
                                 speed=0,
                                 heading=0,
                                 flags=DriveFlagsBitmask.none.value

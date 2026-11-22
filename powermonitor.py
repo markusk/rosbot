@@ -3,7 +3,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This code reads the RVR battery voltage and shows the values on an OLED
+This code reads the rosbot battery voltage and shows the values on an OLED
 via SSD1306 with a nice graphical battery level symbol. If
 the battery level is lower than 50%,  ... [tbd].
 

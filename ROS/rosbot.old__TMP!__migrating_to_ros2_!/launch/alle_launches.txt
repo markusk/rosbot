@@ -9,10 +9,10 @@ This launch file is for the robot.
   <!--
   Setting the hostname of the robot. This is to optional skip hardware setup steps later.
   -->
-  <param name="rvr/hostname" type="String" value="rvrmate" />
+  <param name="rosbot/hostname" type="String" value="rosbot" />
 
   <!-- Controlling the motor on a hardware level -->
-  <node name="motor_server_minibot" pkg="rvr" type="motor_server_minibot.py" output="screen"/>
+  <node name="motor_server_minibot" pkg="rosbot" type="motor_server_minibot.py" output="screen"/>
 </launch>
 === ./rosbot.launch ===
 <?xml version="1.0" encoding="UTF-8"?>
@@ -94,13 +94,13 @@ Launch file for controlling and observing the robots status remote.
   <!-- <node name="rqt_plot" pkg="rqt_plot" type="rqt_plot" output="screen"/> -->
 
   <!-- Joystick control -->
-  <include file="$(find rvr)/launch/joystick_control.launch" pass_all_args="true"/>
+  <include file="$(find rosbot)/launch/joystick_control.launch" pass_all_args="true"/>
 
   <!-- Camera live view (image viewer) -->
   <!-- <node name="image_view" pkg="image_view" type="image_view" args="image:=/camera" output="screen"/> -->
 
   <!-- Laser scanner livew view -->
-  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rvr)/rviz/laserMK.rviz" output="screen"/> -->
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rosbot)/rviz/laserMK.rviz" output="screen"/> -->
 </launch>
 === ./joystick_control.launch ===
 <?xml version="1.0" encoding="UTF-8"?>
@@ -119,9 +119,9 @@ The joystick/gamepas has to be connected to that computer, not the robot.
 
   <!--
   This nodes takes the joystick input and sends out motor control messages.
-  The motor control on a hardware level is started by 'roslaunch rvr motor_server' on the robot.
+  The motor control on a hardware level is started by 'roslaunch rosbot motor_server' on the robot.
   -->
-  <node name="joy_motor_listener" pkg="rvr" type="joy_motor_listener.py" output="screen"/>
+  <node name="joy_motor_listener" pkg="rosbot" type="joy_motor_listener.py" output="screen"/>
 </launch>
 === ./keyboard_control_test.launch ===
 <?xml version="1.0" encoding="UTF-8"?>
@@ -131,7 +131,7 @@ The joystick/gamepas has to be connected to that computer, not the robot.
   <!-- This nodes listens to keyboard input -->
   <node name="teleop_twist_keyboard" pkg="teleop_twist_keyboard" type="teleop_twist_keyboard.py" output="screen"/>
   <!-- This nodes takes the keyboard input and performs any action -->
-  <node name="keyboard_listener" pkg="rvr" type="keyboard_listener.py" output="screen"/>
+  <node name="keyboard_listener" pkg="rosbot" type="keyboard_listener.py" output="screen"/>
 </launch>
 === ./test.launch ===
 <?xml version="1.0" encoding="UTF-8"?>
@@ -151,7 +151,7 @@ Controls the whole robot and has to run on the "rosbot" (Raspberry Pi).
   <param name="rosbot/drivingSpeed" type="int" value="75" />
   <param name="rosbot/turnSpeed"    type="int" value="90" />
 
-  <!-- Testign the Shero RVR -->
+  <!-- Testing the rosbot -->
   <node name="test" pkg="rosbot" type="test.py" output="screen"/>
 </launch>
 === ./motor_server.launch ===
@@ -165,7 +165,7 @@ This launch file is for the robot.
   <!--
   Setting the hostname of the robot. This is to optional skip hardware setup steps later.
   -->
-  <param name="rosbot/hostname" type="String" value="rvrmate" />
+  <param name="rosbot/hostname" type="String" value="rosbot" />
 
   <!-- Controlling the motor on a hardware level -->
   <node name="motor_server" pkg="rosbot" type="motor_server.py" output="screen"/>

@@ -3,7 +3,7 @@
 
 
 # name of the package(!).srv
-from rvr.srv import *
+from rosbot.srv import *
 import rospy
 
 # Service nodes have to be initialised
@@ -14,7 +14,7 @@ rospy.init_node('motor_server', anonymous=False)
 import socket
 # showing hostname
 hostname = socket.gethostname()
-if hostname == 'rvrmate':
+if hostname == 'rosbot':
     rospy.loginfo("Running on host %s.", hostname)
 else:
     rospy.logwarn("Running on host %s!", hostname)
@@ -24,7 +24,7 @@ else:
 ###### motor stuff
 ###############################
 # run some parts only on the real robot
-if hostname == 'rvrmate':
+if hostname == 'rosbot':
     rospy.loginfo("Setting up I2C...")
 
 
@@ -43,7 +43,7 @@ else:
 def my_exit():
   rospy.loginfo("Shutting down motor service...")
   # run some parts only on the real robot
-  if hostname == 'rvrmate':
+  if hostname == 'rosbot':
       turnOffMotors();
   rospy.loginfo("...shutting down motor service complete.")
 

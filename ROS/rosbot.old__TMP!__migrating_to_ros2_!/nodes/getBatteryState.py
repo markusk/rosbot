@@ -19,7 +19,7 @@ from sphero_sdk import RvrLedGroups
 
 loop = asyncio.get_event_loop()
 
-rvr = SpheroRvrAsync(
+rosbot = SpheroRvrAsync(
     dal=SerialAsyncDal(
         loop
     )
@@ -27,27 +27,27 @@ rvr = SpheroRvrAsync(
 
 
 async def main():
-    """ This program demonstrates how to retrieve the battery state of RVR.
+    """ This program demonstrates how to retrieve the battery state of rosbot.
     """
 
-    await rvr.wake()
+    await rosbot.wake()
 
-    # Give RVR time to wake up
+    # Give rosbot time to wake up
     await asyncio.sleep(2)
 
     # turn all LEDs OFF
-    #await rvr.set_all_leds(
+    #await rosbot.set_all_leds(
     #    led_group=RvrLedGroups.all_lights.value,
     #    led_brightness_values=[color for _ in range(10) for color in Colors.off.value]
     #)
 
 
     # battery in %
-    battery_percentage = await rvr.get_battery_percentage()
+    battery_percentage = await rosbot.get_battery_percentage()
     print("Battery percentage: ", battery_percentage['percentage'], "%")
 
     # battery state
-    battery_voltage_state = await rvr.get_battery_voltage_state()
+    battery_voltage_state = await rosbot.get_battery_voltage_state()
     print('Voltage state: ', battery_voltage_state['state'])
 
     # battery state
@@ -65,25 +65,26 @@ async def main():
 
     # set LEDs depending on the battery state
     if battery_percentage['percentage'] > 66:
-    	# All LEDs to green [okay]
-    	await rvr.set_all_leds(
-        	led_group=RvrLedGroups.all_lights.value,
-        	led_brightness_values=[color for x in range(10) for color in [0, 255, 0]]
-    	)
+        # All LEDs to green [okay]
+        await rosbot.set_all_leds(
+            led_group=RvrLedGroups.all_lights.value,
+            led_brightness_values=[color for x in range(10) for color in [0, 255, 0]]
+        )
     elif battery_percentage['percentage'] > 33:
-    	# All LEDs to orange [low]
-    	await rvr.set_all_leds(
-        	led_group=RvrLedGroups.all_lights.value,
-        	led_brightness_values=[color for x in range(10) for color in [255, 165, 0]]
-    	)
+        # All LEDs to orange [low]
+        await rosbot.set_all_leds(
+            led_group=RvrLedGroups.all_lights.value,
+            led_brightness_values=[color for x in range(10) for color in [255, 165, 0]]
+        )
     elif battery_percentage['percentage'] < 33:
-    	# All LEDs to red [critical]
-    	await rvr.set_all_leds(
-        	led_group=RvrLedGroups.all_lights.value,
-        	led_brightness_values=[color for x in range(10) for color in [255, 0, 0]]
-    	)
+        # All LEDs to red [critical]
+        await rosbot.set_all_leds(
+            led_group=RvrLedGroups.all_lights.value,
+            led_brightness_values=[color for x in range(10) for color in [255, 0, 0]]
+        )
 
-    await rvr.close()
+
+    await rosbot.close()
 
 
 if __name__ == '__main__':
@@ -96,13 +97,13 @@ if __name__ == '__main__':
         print('\nProgram terminated with keyboard interrupt.')
 
         # turn all LEDs OFF
-        #await rvr.set_all_leds(
+        #await rosbot.set_all_leds(
         #    led_group=RvrLedGroups.all_lights.value,
         #    led_brightness_values=[color for _ in range(10) for color in Colors.off.value]
         #)
 
         loop.run_until_complete(
-            rvr.close()
+            rosbot.close()
         )
 
     finally:

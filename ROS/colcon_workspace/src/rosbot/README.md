@@ -12,7 +12,7 @@ The active package is `ROS/colcon_workspace/src/rosbot`. The directory `ROS/rosb
 | Keyboard control and `cmd_vel` motor control | Existing `TeleopKeyboardNode` and `MotorControllerNode` are the current implementation. |
 | Xbox/D-pad joystick input | Migrated to `TeleopJoystickNode`, publishing `cmd_vel` from validated `sensor_msgs/Joy` axes/buttons. |
 | ROS 1 motor services | Not migrated: both old service servers are logging/placeholders, and the ROS 2 motor node uses PWM directly. |
-| Sphero RVR odometry and battery | Not migrated: legacy odometry is an incomplete prototype and battery code is a standalone SDK script, not a ROS publisher. They require confirmed hardware, SDK, and frame/units behavior before a safe ROS 2 port. |
+| Robot odometry and battery | Not migrated: legacy odometry is an incomplete prototype and battery code is a standalone SDK script, not a ROS publisher. They require confirmed hardware, SDK, and frame/units behavior before a safe ROS 2 port. |
 | GPIO LED test | `LEDPWMNode` is retained as a standalone hardware smoke test and is not part of normal robot control. |
 | Empty heading driver and print-only keyboard listener | No independent functionality to migrate. |
 

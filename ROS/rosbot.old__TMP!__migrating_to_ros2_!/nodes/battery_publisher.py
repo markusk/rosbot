@@ -2,7 +2,7 @@
 # coding=utf-8
 
 """
-This node generates battery messages from the RVR.
+This node generates battery messages from the rosbot.
 
 It publishes battery messages into ROS.
 Author:  Markus Knapp, 2020
@@ -10,8 +10,8 @@ Website: https://direcs.de
 """
 
 
-# RVR stuff
-# path to find the RVR lib from the public SDK
+# rosbot stuff
+# path to find the rosbot lib from the public SDK
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/')))
@@ -59,7 +59,7 @@ seq = 0
 
 loop = asyncio.get_event_loop()
 
-rvr = SpheroRvrAsync(
+rosbot = SpheroRvrAsync(
     dal=SerialAsyncDal(
         loop
         # device='/dev/ttyTHS1',
@@ -138,29 +138,29 @@ async def main():
     pub_odom = rospy.Publisher('odom', Odometry, queue_size=10)
     br = tf.TransformBroadcaster()
 
-    await rvr.wake()
+    await rosbot.wake()
 
-    # Give RVR time to wake up
+    # Give rosbot time to wake up
     await asyncio.sleep(2)
 
-    await rvr.sensor_control.add_sensor_data_handler(
+    await rosbot.sensor_control.add_sensor_data_handler(
         service=RvrStreamingServices.locator,
         handler=locator_handler,
     )
-    await rvr.sensor_control.add_sensor_data_handler(
+    await rosbot.sensor_control.add_sensor_data_handler(
         service=RvrStreamingServices.quaternion,
         handler=quaternion_handler,
     )
-    await rvr.sensor_control.add_sensor_data_handler(
+    await rosbot.sensor_control.add_sensor_data_handler(
         service=RvrStreamingServices.gyroscope,
         handler=gyroscope_handler,
     )
-    await rvr.sensor_control.add_sensor_data_handler(
+    await rosbot.sensor_control.add_sensor_data_handler(
         service=RvrStreamingServices.velocity,
         handler=velocity_handler,
     )
 
-    await rvr.sensor_control.start(interval=250)
+    await rosbot.sensor_control.start(interval=250)
 
 
 # The asyncio loop will run forever to allow infinite streaming.
@@ -176,8 +176,8 @@ if __name__ == '__main__':
 
         loop.run_until_complete(
             asyncio.gather(
-                rvr.sensor_control.clear(),
-                rvr.close()
+                rosbot.sensor_control.clear(),
+                rosbot.close()
             )
         )
 

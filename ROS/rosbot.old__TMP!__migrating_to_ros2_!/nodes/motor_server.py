@@ -35,13 +35,13 @@ else:
     rospy.logwarn("Running on host %s, and not %s as set in main launchfile!" % (hostname, configHostname))
 
 
-# RVR stuff
+# rosbot stuff
 #if hostname == configHostname:
-#    rospy.loginfo("Setting up RVR...")
+#    rospy.loginfo("Setting up rosbot...")
 #
 #    import os
 #    import sys
-#    # path to find the RVR lib from the public SDK
+#    # path to find the rosbot lib from the public SDK
 #    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../lib/')))
 #
 #    import asyncio
@@ -52,14 +52,14 @@ else:
 #
 #    loop = asyncio.get_event_loop()
 #
-#    rvr = SpheroRvrAsync(
+#    rosbot = SpheroRvrAsync(
 #        dal=SerialAsyncDal(
 #            loop
 #        )
 #    )
 #    rospy.loginfo("...done.")
 #else:
-#    rospy.logwarn("Skipping RVR setup. This is not the robot.")
+#    rospy.logwarn("Skipping rosbot setup. This is not the robot.")
 
 
 # define a clean ROS node exit
@@ -86,22 +86,22 @@ def handle_motor(req):
         # drive
         rospy.loginfo("Driving %s @ speed %s.", req.direction, req.speed)
 #        if hostname == configHostname:
-#            await rvr.drive_with_heading(
+#            await rosbot.drive_with_heading(
 #                speed  = req.speed,  # Valid speed values are 0-255
 #                heading=        90,  # Valid heading values are 0-359
 #                flags=DriveFlagsBitmask.none.value
 #            )
-#            # Delay to allow RVR to drive
+#            # Delay to allow rosbot to drive
 #            await asyncio.sleep(1)
     elif (req.direction == "STOP"):
         rospy.loginfo("Stopping.")
 #        if hostname == configHostname:
-#            await rvr.drive_with_heading(
+#            await rosbot.drive_with_heading(
 #                speed  =         0,  # Valid speed values are 0-255
 #                heading=         0,  # Valid heading values are 0-359
 #                flags=DriveFlagsBitmask.none.value
 #            )
-#            # Delay to allow RVR to drive
+#            # Delay to allow rosbot to drive
 #            await asyncio.sleep(1)
     else:
       rospy.logerr("Direction '%s' not implemented.", req.direction)
@@ -119,14 +119,14 @@ def motor_server():
     s = rospy.Service('motor', Motor, handle_motor)
     rospy.loginfo("Ready to switch motors.")
 
-    # start RVR comms
+    # start rosbot comms
     if hostname == configHostname:
-        rospy.loginfo("Waking up RVR...")
-#        await rvr.wake()
-        # Give RVR time to wake up (2 seconds)
+        rospy.loginfo("Waking up rosbot...")
+#        await rosbot.wake()
+        # Give rosbot time to wake up (2 seconds)
 #        await asyncio.sleep(2)
         # reset YAW
-#        await rvr.reset_yaw()
+#        await rosbot.reset_yaw()
         rospy.loginfo("...done.")
 
     # Keep our code from exiting until this service node is shutdown
@@ -146,13 +146,13 @@ if __name__ == "__main__":
 
         if hostname == configHostname:
             loop.run_until_complete(
-                # stop RVR comms
-                rvr.close()
+                # stop rosbot comms
+                rosbot.close()
             )
 
     finally:
         if hostname == configHostname:
             if loop.is_running():
-                # stop RVR comms
+                # stop rosbot comms
                 loop.close()
 """
