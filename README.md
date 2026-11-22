@@ -33,13 +33,6 @@ colcon build --symlink-install --packages-select rosbot
 
 `rosdep install` installs the package dependencies, including the ROS joystick, camera, and laser drivers. Optional devices still need to be physically connected and configured. Re-run dependency installation if package dependencies change; rebuild after changing source code.
 
-***In case you get an error***, saying that '...rosbot/ROS/colcon_workspace/install/rosbot/share/rosbot/package.xml' already exists, do the following:
-```bash
-cd ~/rosbot/ROS/colcon_workspace
-rm -rf build/rosbot install/rosbot
-source /opt/ros/jazzy/setup.bash
-colcon build --symlink-install --packages-select rosbot
-```
 
 ### 3. Configure the Raspberry Pi for motor GPIO (robot only)
 
