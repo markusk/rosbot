@@ -131,10 +131,6 @@ dmypy.json
 ROS/catkin_workspace/src/CMakeLists.txt
 # Visual Code Studio settings
 .vscode/
-# rosbot firmware check file
-.fw
-# Symbolic Link to the Sphero SDK
-lib/*
 
 # colcon build artifacts
 /ROS/colcon_workspace/build/
