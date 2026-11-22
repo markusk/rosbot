@@ -63,7 +63,7 @@ On any host whose name is not `rosbot`, the motor node does not access GPIO and 
 
 ### 4. Optional device setup
 
-- **Joystick:** Connect a supported gamepad to Linux. To diagnose the Linux device, install `joystick` and run `jstest --normal /dev/input/js0`. The ROS `joy` driver is installed through `rosdep`.
+- **Joystick:** Connect a supported gamepad to Linux. To diagnose the Linux device, install the `joystick` package (`sudo apt-get install joystick`) and run `jstest --normal /dev/input/js0`. The ROS `joy` driver is installed through `rosdep`.
 - **Camera:** Connect a camera supported by the Pi's libcamera version. The `camera_ros` driver is installed through `rosdep`.
 - **Hokuyo laser:** Connect the URG-LX04-UG01 over USB. Confirm its serial device and supported baud rate on the robot; prefer a stable path under `/dev/serial/by-id/` when available.
 
