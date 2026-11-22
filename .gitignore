@@ -136,6 +136,11 @@ ROS/catkin_workspace/src/CMakeLists.txt
 # Symbolic Link to the Sphero SDK
 lib/*
 
+# colcon build artifacts
+/ROS/colcon_workspace/build/
+/ROS/colcon_workspace/install/
+/ROS/colcon_workspace/log/
+
 # Markus stuff
 ROS/colcon_workspace/src/install/*
 ROS/colcon_workspace/src/log/*
