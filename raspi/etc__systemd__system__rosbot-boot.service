@@ -1,14 +1,11 @@
 [Unit]
-Description=Startet den pigpio-Daemon für den Rosbot
+Description=Legacy GPIO service placeholder; gpiozero requires no daemon
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/pigpiod -g
-ExecStop=/bin/killall pigpiod
-Restart=on-failure
-User=root
-Type=forking
-PIDFile=/run/pigpio.pid
+Type=oneshot
+ExecStart=/bin/true
+RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

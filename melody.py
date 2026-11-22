@@ -1,25 +1,21 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import pigpio
 import time
+from gpiozero import DigitalOutputDevice
 
 BUZZER = 13
 
-pi = pigpio.pi()  # connecting to pigpio daemon
-print("Connecting to Raspi...")
-if not pi.connected:
-    exit()
+buzzer = DigitalOutputDevice(BUZZER)
 
-pi.set_mode(BUZZER, pigpio.OUTPUT)
 
 def buzz(noteFreq, duration):
     halveWaveTime = 1 / (noteFreq * 2)
     waves = int(duration * noteFreq)
     for i in range(waves):
-        pi.write(BUZZER, 1)
+        buzzer.on()
         time.sleep(halveWaveTime)
-        pi.write(BUZZER, 0)
+        buzzer.off()
         time.sleep(halveWaveTime)
 
 def play():
@@ -39,4 +35,4 @@ def play():
 
 play()
 
-pi.stop()  # close connection
+buzzer.close()

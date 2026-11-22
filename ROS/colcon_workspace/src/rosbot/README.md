@@ -50,7 +50,7 @@ The correct fixed transform from the robot base frame to `laser` is still requir
 
 ## L298N motor hardware
 
-`MotorControllerNode` uses pigpio PWM on the L298N enable pins and digital outputs for direction. GPIO values below are BCM GPIO numbers; the ROS 2 wheel kinematics are unchanged.
+`MotorControllerNode` uses gpiozero PWM outputs on the L298N enable pins and digital outputs for direction. GPIO values below are BCM GPIO numbers; the ROS 2 wheel kinematics are unchanged.
 
 | Wheel | IN A | IN B | Enable/PWM |
 | --- | ---: | ---: | ---: |
@@ -105,13 +105,11 @@ Consumes `sensor_msgs/Joy` on `/joy` and publishes `geometry_msgs/Twist` on `/cm
 
 ### Voraussetzungen
 ```bash
-# pigpio installieren (auf dem Raspberry Pi)
-sudo apt-get install pigpio python3-pigpio
-
-# pigpio daemon starten
-sudo systemctl enable pigpiod
-sudo systemctl start pigpiod
+sudo apt-get update
+sudo apt-get install python3-gpiozero
 ```
+
+gpiozero benötigt keinen separaten GPIO-Daemon.
 
 ### Build
 ```bash
@@ -190,20 +188,9 @@ Diese Funktionen sind mögliche spätere Erweiterungen und setzen passende Hardw
 
 ## Troubleshooting
 
-### pigpio Fehler
-```bash
-# Prüfen ob pigpiod läuft
-sudo systemctl status pigpiod
+### gpiozero Fehler
 
-# Neu starten
-sudo systemctl restart pigpiod
-```
-
-### Permissions
-```bash
-# User zur gpio Gruppe hinzufügen
-sudo usermod -a -G gpio $USER
-```
+Check that the gpiozero package is installed and that the selected GPIO pin factory is available for the Raspberry Pi. The user running the node must have permission to access GPIO.
 
 ## Lizenz
 MIT

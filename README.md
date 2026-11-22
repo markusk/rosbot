@@ -6,7 +6,7 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 
 - ROS 2 Jazzy on Ubuntu. For Raspberry Pi installation, see the [ROS 2 Raspberry Pi installation guide](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html).
 - `colcon` and `rosdep`.
-- On the robot: pigpio and its Python package for GPIO control.
+- On the robot: gpiozero for GPIO control.
 - Optional devices: a Linux-compatible gamepad, a libcamera-supported Raspberry Pi camera with `camera_ros`, and/or a Hokuyo URG-LX04-UG01 with `urg_node`.
 
 ## One-time setup
@@ -50,41 +50,14 @@ sudo hostnamectl set-hostname rosbot
 hostname
 ```
 
-Install pigpio and its Python binding:
+Install gpiozero on the Raspberry Pi:
 
 ```bash
 sudo apt-get update
-sudo apt-get install pigpio python3-pigpio
+sudo apt-get install python3-gpiozero
 ```
 
-***In case pgpio is not found for your Ubuntu version, install it manually:***
-```bash
-sudo apt update
-sudo apt install wget unzip build-essential
-
-cd ~
-wget https://github.com/joan2937/pigpio/archive/master.zip
-unzip master.zip
-cd pigpio-master
-make
-sudo make install
-```
-
-Configure **one** pigpio service option, depending on where `pigpiod` is installed. If it is at `/usr/local/bin/pigpiod`, use the repository service:
-
-```bash
-sudo cp ~/rosbot/raspi/etc__systemd__system__rosbot-boot.service /etc/systemd/system/rosbot-boot.service
-sudo systemctl daemon-reload
-sudo systemctl enable --now rosbot-boot.service
-```
-
-If pigpio was installed from the Ubuntu package and its daemon is not at `/usr/local/bin/pigpiod`, use the package-provided service instead:
-
-```bash
-sudo systemctl enable --now pigpiod
-```
-
-Check the selected service with `sudo systemctl status rosbot-boot.service` or `sudo systemctl status pigpiod`, then verify pigpio responds with `pigs t`.
+gpiozero accesses GPIO directly through its selected pin factory and does not require a separate GPIO daemon or systemd service.
 
 On any host whose name is not `rosbot`, the motor node does not access GPIO and simulates motor output. Do not set the robot hostname on a development computer.
 

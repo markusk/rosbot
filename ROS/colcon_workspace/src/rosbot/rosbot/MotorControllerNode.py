@@ -56,22 +56,24 @@ MOTOR_PIN_CONFIG = (
 class MotorChannel:
     """Control one L298N channel with direction pins and enable PWM."""
 
-    PWM_RANGE = 255
     MINIMUM_DUTY = 0.02
 
-    def __init__(self, pi, in_a, in_b, enable, output_mode, pwm_frequency=1000):
-        self.pi = pi
-        self.in_a = in_a
-        self.in_b = in_b
-        self.enable = enable
-
-        for pin in (self.in_a, self.in_b, self.enable):
-            self.pi.set_mode(pin, output_mode)
-            self.pi.write(pin, 0)
-
-        self.pi.set_PWM_range(self.enable, self.PWM_RANGE)
-        self.pi.set_PWM_frequency(self.enable, pwm_frequency)
-        self.pi.set_PWM_dutycycle(self.enable, 0)
+    def __init__(
+        self,
+        in_a,
+        in_b,
+        enable,
+        output_device_factory,
+        pwm_output_device_factory,
+        pwm_frequency=1000,
+    ):
+        self.in_a = output_device_factory(in_a, initial_value=False)
+        self.in_b = output_device_factory(in_b, initial_value=False)
+        self.enable = pwm_output_device_factory(
+            enable,
+            frequency=pwm_frequency,
+            initial_value=0,
+        )
 
     def set_speed(self, value):
         value = max(-1.0, min(1.0, value))
@@ -79,21 +81,26 @@ class MotorChannel:
             self.stop()
             return
 
-        self.pi.set_PWM_dutycycle(self.enable, 0)
+        self.enable.value = 0
         if value > 0:
-            self.pi.write(self.in_a, 1)
-            self.pi.write(self.in_b, 0)
+            self.in_a.on()
+            self.in_b.off()
         else:
-            self.pi.write(self.in_a, 0)
-            self.pi.write(self.in_b, 1)
+            self.in_a.off()
+            self.in_b.on()
 
-        duty = round(abs(value) * self.PWM_RANGE)
-        self.pi.set_PWM_dutycycle(self.enable, duty)
+        self.enable.value = abs(value)
 
     def stop(self):
-        self.pi.set_PWM_dutycycle(self.enable, 0)
-        self.pi.write(self.in_a, 0)
-        self.pi.write(self.in_b, 0)
+        self.enable.value = 0
+        self.in_a.off()
+        self.in_b.off()
+
+    def close(self):
+        self.stop()
+        self.enable.close()
+        self.in_a.close()
+        self.in_b.close()
 
 
 class MotorControllerNode(Node):
@@ -108,27 +115,19 @@ class MotorControllerNode(Node):
             raise ValueError('cmd_vel_timeout must be greater than zero')
 
         self.hostname = socket.gethostname()
-        self.pi = None
         self.motors = []
 
         if self.hostname == 'rosbot':
-            import pigpio
+            from gpiozero import DigitalOutputDevice, PWMOutputDevice
 
-            self.get_logger().info('Connecting to pigpio daemon...')
-            self.pi = pigpio.pi()
-            if not self.pi.connected:
-                self.pi.stop()
-                raise RuntimeError(
-                    'Cannot connect to pigpiod. Start the daemon and verify '
-                    'the installation before launching the motor controller.')
-
+            self.get_logger().info('Initialising gpiozero motor outputs...')
             self.motors = [
                 MotorChannel(
-                    self.pi,
                     in_a=in_a,
                     in_b=in_b,
                     enable=enable,
-                    output_mode=pigpio.OUTPUT,
+                    output_device_factory=DigitalOutputDevice,
+                    pwm_output_device_factory=PWMOutputDevice,
                 )
                 for _, in_a, in_b, enable in MOTOR_PIN_CONFIG
             ]
@@ -246,7 +245,7 @@ class MotorControllerNode(Node):
 
     def set_motor_pwm(self):
         """Apply signed wheel commands to L298N direction and PWM channels."""
-        if self.hostname == 'rosbot' and self.pi:
+        if self.hostname == 'rosbot':
             for motor, speed in zip(self.motors, self.wheel_speeds):
                 motor.set_speed(speed)
 
@@ -262,11 +261,11 @@ class MotorControllerNode(Node):
         self.get_logger().info('All motors stopped')
 
     def destroy_node(self):
-        """Clean up motor channels and pigpio connection."""
-        if self.hostname == 'rosbot' and self.pi:
+        """Clean up motor channels."""
+        if self.hostname == 'rosbot':
             self.get_logger().info('Stopping motors and shutting down...')
-            self.stop_all()
-            self.pi.stop()
+            for motor in self.motors:
+                motor.close()
         super().destroy_node()
 
 

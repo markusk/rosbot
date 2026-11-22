@@ -2,7 +2,7 @@
 
 ## Current State
 
-The active ROS 2 Jazzy package is `ROS/colcon_workspace/src/rosbot`. It provides motor control, keyboard and joystick teleoperation, command arbitration, and a command-velocity watchdog. Optional launch support is available for a Raspberry Pi camera through `camera_ros` and a Hokuyo scanner through `urg_node`. The ROS 1 directory is an archive and is not part of the active colcon build.
+The active ROS 2 Jazzy package is `ROS/colcon_workspace/src/rosbot`. It provides motor control using gpiozero, keyboard and joystick teleoperation, command arbitration, and a command-velocity watchdog. Optional launch support is available for a Raspberry Pi camera through `camera_ros` and a Hokuyo scanner through `urg_node`. The ROS 1 directory is an archive and is not part of the active colcon build.
 
 The ROS 2 build and package tests have been completed successfully in a Jazzy virtual machine, as reported by the project owner. Physical motor and sensor behavior has not been verified because the robot is currently unavailable.
 

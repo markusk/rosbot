@@ -12,16 +12,12 @@ class LEDPWMNode(Node):
 
         self.LED_PIN = 18  # GPIO Pin for the LED
         self.hostname = socket.gethostname()
-        self.pi = None
+        self.led = None
 
         if self.hostname == 'rosbot':
-            import pigpio
+            from gpiozero import PWMLED
 
-            self.pi = pigpio.pi()
-            self.get_logger().info('Connecting to Raspi...')
-            if not self.pi.connected:
-                self.get_logger().error('Failed to connect to pigpio daemon')
-                exit()
+            self.led = PWMLED(self.LED_PIN, initial_value=0)
         else:
             self.get_logger().info('Simulating LED behavior')
 
@@ -30,7 +26,7 @@ class LEDPWMNode(Node):
         self.increasing = True
 
     def pwm_callback(self):
-        if self.hostname == 'rosbot' and self.pi:
+        if self.hostname == 'rosbot' and self.led:
             if self.increasing:
                 self.duty_cycle += 1
                 if self.duty_cycle >= 255:
@@ -40,7 +36,7 @@ class LEDPWMNode(Node):
                 if self.duty_cycle <= 0:
                     self.increasing = True
 
-            self.pi.set_PWM_dutycycle(self.LED_PIN, self.duty_cycle)
+            self.led.value = self.duty_cycle / 255
         else:
             # Simulating the LED PWM behavior
             if self.increasing:
@@ -56,10 +52,10 @@ class LEDPWMNode(Node):
                 f'Simulated LED duty cycle: {self.duty_cycle}')
 
     def destroy_node(self):
-        if self.hostname == 'rosbot' and self.pi:
+        if self.hostname == 'rosbot' and self.led:
             self.get_logger().info('Turning off LED')
-            self.pi.set_PWM_dutycycle(self.LED_PIN, 0)
-            self.pi.stop()
+            self.led.off()
+            self.led.close()
         super().destroy_node()
 
 

@@ -1,32 +1,24 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-
 """ Some first GPIO stuff with the Raspberry Pi """
 
-import pigpio
 import time
-
+from gpiozero import LED
 
 PIN = 18  # GPIO number for a LED
 
-pi = pigpio.pi()  # connect to pigpio daemon
-
-
-print("Connecting to Raspi...")
-if not pi.connected:
-    print("ERROR")
-    exit()
+led = LED(PIN)
 
 try:
     while True:
         print("ON")
-        pi.write(PIN, 1)  # set to HIGH
+        led.on()  # set to HIGH
         time.sleep(1)
         print("OFF")
-        pi.write(PIN, 0)  # set to LOW
+        led.off()  # set to LOW
         time.sleep(1)
 except KeyboardInterrupt:
     print("OFF")
-    pi.write(PIN, 0)  # set to LOW again
-    pi.stop()  # close connection
+    led.off()  # set to LOW again
+    led.close()

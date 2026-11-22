@@ -1,48 +1,46 @@
 #!/usr/bin/env python3
 # coding=utf-8
 
-
 """ Some first GPIO stuff with the Raspberry Pi """
 
-import pigpio
 import time
+from gpiozero import DigitalOutputDevice, PWMOutputDevice
 
 MotorA1In3 = 4     # GPIO
 MotorA1In4 = 27    # GPIO
-MotorA1En  = 17    # GPIO (Enable / PWM)
-MotorA1PWM = 200   # PWM duty cycle (0-255) aka "max motor speed"
+MotorA1En = 17     # GPIO (Enable / PWM)
+MotorA1PWM = 200 / 255  # PWM duty cycle (0-1) aka "max motor speed"
 
-
-pi = pigpio.pi()  # connect to pigpio daemon
-print("Connecting to Raspi...")
-if not pi.connected:
-    exit()
-
+in3 = DigitalOutputDevice(MotorA1In3, initial_value=False)
+in4 = DigitalOutputDevice(MotorA1In4, initial_value=False)
+enable = PWMOutputDevice(MotorA1En, initial_value=0)
 
 try:
     while True:
         # turn Motor RIGHT
         print("Motors RIGHT")
-        pi.set_PWM_dutycycle(MotorA1En, MotorA1PWM)
-        pi.write(MotorA1In3, 1)
-        pi.write(MotorA1In4, 0)
+        enable.value = MotorA1PWM
+        in3.on()
+        in4.off()
         time.sleep(1)
 
         # turn Motor LEFT
         print("Motors LEFT")
-        pi.set_PWM_dutycycle(MotorA1En, MotorA1PWM)
-        pi.write(MotorA1In3, 0)
-        pi.write(MotorA1In4, 1)
+        enable.value = MotorA1PWM
+        in3.off()
+        in4.on()
         time.sleep(1)
 
         # turn Motor OFF
         print("Motors OFF")
-        pi.set_PWM_dutycycle(MotorA1En, 0)
+        enable.value = 0
         time.sleep(1)
 except KeyboardInterrupt:
     # turn Motor OFF
     print("Motors OFF")
-    pi.set_PWM_dutycycle(MotorA1En, 0)
-    pi.write(MotorA1In3, 0)
-    pi.write(MotorA1In4, 0)
-    pi.stop()  # close connection
+    enable.value = 0
+    in3.off()
+    in4.off()
+    enable.close()
+    in3.close()
+    in4.close()
