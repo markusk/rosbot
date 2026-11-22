@@ -54,7 +54,20 @@ Install pigpio and its Python binding:
 
 ```bash
 sudo apt-get update
-sudo apt-get install pigpio-tools python3-pigpio
+sudo apt-get install pigpio python3-pigpio
+```
+
+***In case pgpio is not found for your Ubuntu version, install it manually:***
+```bash
+sudo apt update
+sudo apt install wget unzip build-essential
+
+cd ~
+wget https://github.com/joan2937/pigpio/archive/master.zip
+unzip master.zip
+cd pigpio-master
+make
+sudo make install
 ```
 
 Configure **one** pigpio service option, depending on where `pigpiod` is installed. If it is at `/usr/local/bin/pigpiod`, use the repository service:
