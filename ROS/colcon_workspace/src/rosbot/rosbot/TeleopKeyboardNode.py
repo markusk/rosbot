@@ -158,15 +158,15 @@ class TeleopKeyboardNode(Node):
                     self.angular_speed = max(
                         0.1, self.angular_speed - self.speed_increment)
                     print(f'slower: {self.linear_speed:.2f} m/s')
-                # Stopp
+                # Stop
                 elif key == ' ':
                     self.publish_twist()
                     print('⏹ STOP')
-                # Beenden
-                elif key in ('\x1b', '\x03'):  # ESC oder Ctrl+C
+                # Exit
+                elif key in ('\x1b', '\x03'):  # ESC or Ctrl+C
                     print('\nEnding...')
                     break
-                # Hilfe
+                # Help
                 elif key in ('h', 'H'):
                     self.print_instructions()
 
