@@ -50,16 +50,9 @@ The correct fixed transform from the robot base frame to `laser` is still requir
 
 ## L298N motor hardware
 
-`MotorControllerNode` uses gpiozero PWM outputs on the L298N enable pins and digital outputs for direction. GPIO values below are BCM GPIO numbers; the ROS 2 wheel kinematics are unchanged.
+`MotorControllerNode` uses gpiozero PWM outputs on the L298N enable pins and digital outputs for direction. The central pin assignment table, including BCM GPIO and physical header pin numbers for the Raspberry Pi 5, is in the [global README](../../../../README.md).
 
-| Wheel | IN A | IN B | Enable/PWM |
-| --- | ---: | ---: | ---: |
-| Front left | 5 | 6 | 12 |
-| Front right | 20 | 21 | 13 |
-| Rear left | 23 | 24 | 18 |
-| Rear right | 16 | 26 | 19 |
-
-Remove the ENA/ENB jumpers on both L298N boards when using GPIO-controlled PWM. GPIO 18 is allocated to the rear-left motor enable. `LEDPWMNode` is only a standalone hardware test and must not run while the motor controller is using this pin. The main launch does not start the LED node.
+Remove the corresponding jumpers on the L298N modules when using PWM on ENA/ENB. GPIO 18 is assigned to the rear-left wheel's enable input. `LEDPWMNode` is a separate hardware test and must not run at the same time as motor control because it uses the same GPIO. The standard launch does not start the LED node.
 
 The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands. The ROS 2 build and package tests have been completed in a Jazzy virtual machine; physical motor behavior still needs validation on the Raspberry Pi.
 
@@ -68,7 +61,7 @@ The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arr
 ### 1. MotorControllerNode
 Steuert 4 Motoren über PWM für Omniwheel-Kinematik.
 
-**BCM GPIO-Pins:** See the L298N motor pin table in the `L298N motor hardware` section below.
+**BCM GPIO pins:** See the central Raspberry Pi 5 pin assignment table in the [global README](../../../../README.md).
 
 **Subscribed Topics:**
 - `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle

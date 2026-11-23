@@ -114,6 +114,27 @@ source install/setup.bash
 
 If `package.xml` dependencies changed, run `rosdep install --from-paths src --ignore-src -r -y` before building.
 
-## Further details
+## Raspberry Pi 5 and L298N pin assignments
 
-The package README documents node topics, L298N BCM pin assignments, joystick mappings, and hardware limitations: `ROS/colcon_workspace/src/rosbot/README.md`.
+The code uses **BCM GPIO numbers**. Physical pin numbers refer to positions on the Raspberry Pi's 40-pin header. Both numbers are listed below; do not confuse them. The GPIO assignments are unchanged from earlier Raspberry Pi models with the same 40-pin header.
+
+| Wheel | L298N input | BCM GPIO | Physical Pi pin |
+| --- | --- | ---: | ---: |
+| Front left | IN A | 5 | 29 |
+| Front left | IN B | 6 | 31 |
+| Front left | ENA / PWM | 12 | 32 |
+| Front right | IN A | 20 | 38 |
+| Front right | IN B | 21 | 40 |
+| Front right | ENB / PWM | 13 | 33 |
+| Rear left | IN A | 23 | 16 |
+| Rear left | IN B | 24 | 18 |
+| Rear left | ENA / PWM | 18 | 12 |
+| Rear right | IN A | 16 | 36 |
+| Rear right | IN B | 26 | 37 |
+| Rear right | ENB / PWM | 19 | 35 |
+
+Remove the corresponding jumpers on the L298N modules when using PWM on ENA/ENB. GPIO 18 (physical pin 12) is assigned to the rear-left wheel's enable input; the separate LED PWM test uses the same GPIO and must not run at the same time as motor control.
+
+**Safety:** Raspberry Pi GPIOs use 3.3 V logic and are not 5 V tolerant. Do not connect motors directly to the Pi; power them through the L298N drivers. The Pi and motor drivers must share a common ground. Check the wiring and header orientation before powering on; perform initial movement tests with the wheels raised and at low speed.
+
+For more information about nodes, joystick control, and hardware limitations, see the [package README](ROS/colcon_workspace/src/rosbot/README.md).
