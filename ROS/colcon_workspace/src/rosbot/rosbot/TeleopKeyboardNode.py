@@ -135,10 +135,10 @@ class TeleopKeyboardNode(Node):
                     print('↘ right backward')
                 # Rotation
                 elif key in ('j', 'J'):
-                    self.publish_twist(angular_z=self.angular_speed)
+                    self.publish_twist(angular_z=-self.angular_speed)
                     print('↺ left rotate')
                 elif key in ('l', 'L'):
-                    self.publish_twist(angular_z=-self.angular_speed)
+                    self.publish_twist(angular_z=self.angular_speed)
                     print('↻ right rotate')
                 # Speed adjustment
                 elif key in ('+', '='):
