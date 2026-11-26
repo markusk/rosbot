@@ -35,31 +35,24 @@ class TeleopKeyboardNode(Node):
         ╔════════════════════════════════════╗
         ║   ROSBOT KEYBOARD TELEOPERATION    ║
         ╠════════════════════════════════════╣
+        ║              W   (forward)         ║
+        ║              ↑                     ║
+        ║   Left   A ← + → D   Right         ║
+        ║              ↓                     ║
+        ║              S   (backward)        ║
         ║                                    ║
-        ║   Movement (Omniwheel):            ║
-        ║                                    ║
-        ║        W (forward)                 ║
-        ║        ↑                           ║
-        ║   A ← + → D                        ║
-        ║        ↓                           ║
-        ║        S (backward)                ║
+        ║   Rotation:                        ║
+        ║   J: turn left    L: turn right    ║
         ║                                    ║
         ║   Q: left forward diagonal         ║
         ║   E: right forward diagonal        ║
         ║   Z: left backward diagonal        ║
         ║   C: right backward diagonal       ║
         ║                                    ║
-        ║   Rotation:                        ║
-        ║   J: turn left                     ║
-        ║   L: turn right                    ║
-        ║                                    ║
         ║   Speed:                           ║
-        ║   +: faster                        ║
-        ║   -: slower                        ║
+        ║   +: faster       -: slower        ║
         ║                                    ║
-        ║   SPACE: Stop                      ║
-        ║   ESC/Ctrl+C: End                  ║
-        ║                                    ║
+        ║   SPACE: Stop     ESC/Ctrl+C: End  ║
         ╚════════════════════════════════════╝
         """
         print(msg)
