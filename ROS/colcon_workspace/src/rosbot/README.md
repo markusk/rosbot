@@ -1,7 +1,8 @@
-# ROS2 Rosbot - Omniwheel Roboter
+# ROS 2 Rosbot - Omniwheel Robot
 
-## Übersicht
-Dieses Paket enthält ROS2-Nodes für einen Omniwheel-Roboter mit 4 Motoren auf einem Raspberry Pi.
+## Overview
+
+This package contains ROS 2 nodes for a four-motor omniwheel robot running on a Raspberry Pi.
 
 ## ROS 2 migration status
 
@@ -59,12 +60,13 @@ The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arr
 ## Nodes
 
 ### 1. MotorControllerNode
-Steuert 4 Motoren über PWM für Omniwheel-Kinematik.
+
+Controls four motors using PWM for omniwheel kinematics.
 
 **BCM GPIO pins:** See the central Raspberry Pi 5 pin assignment table in the [global README](../../../../README.md).
 
-**Subscribed Topics:**
-- `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle
+**Subscribed topics:**
+- `/cmd_vel` (`geometry_msgs/Twist`): velocity commands
 
 The node stops the motors if active velocity commands stop arriving. The `cmd_vel_timeout` parameter defaults to `0.5` seconds and must be greater than zero. Override it at launch, for example:
 
@@ -75,45 +77,51 @@ ros2 launch rosbot rosbot_launch.py cmd_vel_timeout:=0.75
 This watchdog is a software fallback, not a replacement for a physical emergency stop.
 
 ### 2. TeleopKeyboardNode
-Tastatursteuerung für den Roboter.
 
-**Tasten:**
-- W/A/S/D: Vorwärts/Links/Rückwärts/Rechts
-- Q/E/Z/C: Diagonale Bewegungen
-- J/L: Links/Rechts drehen
-- +/-: Geschwindigkeit erhöhen/verringern
-- SPACE: Stopp
-- ESC: Beenden
+Keyboard control for the robot.
 
-**Published Topics:**
-- `/cmd_vel` (geometry_msgs/Twist): Bewegungsbefehle
+**Keys:**
+- W/A/S/D: forward/left/backward/right
+- Q/E/Z/C: diagonal movement
+- J/L: rotate left/right
+- +/-: increase/decrease speed
+- SPACE: stop
+- ESC: exit
+
+**Published topics:**
+- `/cmd_vel` (`geometry_msgs/Twist`): velocity commands
 
 ### 3. LEDPWMNode
+
 Standalone ROS 2 GPIO smoke test for the LED PWM hardware. It is deliberately excluded from normal robot control. Run only when the motor controller is stopped because its test GPIO 18 is assigned to the rear-left L298N enable input.
 
 ### 4. TeleopJoystickNode
+
 Consumes `sensor_msgs/Joy` on `/joy` and publishes `geometry_msgs/Twist` on `/cmd_vel`. The default mapping supports the legacy controller axes 5/7 for forward/backward, axes 4/6 for turning, and buttons 10/1 for stop. Axis and button indices plus speeds are ROS parameters, and short or differently sized joystick messages are handled without indexing errors.
 
 ## Installation
 
-### Voraussetzungen
+### Prerequisites
+
 ```bash
 sudo apt-get update
 sudo apt-get install python3-gpiozero
 ```
 
-gpiozero benötigt keinen separaten GPIO-Daemon.
+gpiozero does not require a separate GPIO daemon.
 
 ### Build
+
 ```bash
 cd ~/ROS/colcon_workspace
 colcon build --packages-select rosbot
 source install/setup.bash
 ```
 
-## Verwendung
+## Usage
 
-### Nodes starten
+### Launch the nodes
+
 ```bash
 ros2 launch rosbot rosbot_launch.py
 ```
@@ -128,62 +136,70 @@ On a Mac, the launch file does not start the camera node or access GPIO hardware
 
 Pressing `ESC` in the keyboard teleoperation terminal stops the robot and shuts down the entire launch, including the motor, joystick, and arbitration nodes. `Ctrl+C` in the launch terminal also shuts down all launched nodes.
 
-### Einzelne Nodes starten
+### Launch individual nodes
 
-**Motor Controller:**
+**Motor controller:**
+
 ```bash
 ros2 run rosbot MotorControllerNode
 ```
 
-**Tastatursteuerung:**
+**Keyboard control:**
+
 ```bash
 ros2 run rosbot TeleopKeyboardNode
 ```
 
 **LED PWM hardware smoke test (run with the motor controller stopped):**
+
 ```bash
 ros2 run rosbot LEDPWMNode
 ```
 
-### Manuell Bewegungsbefehle senden
+### Publish velocity commands manually
+
 ```bash
-# Vorwärts fahren
+# Move forward
 ros2 topic pub /cmd_vel geometry_msgs/Twist "{linear: {x: 0.5, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 
-# Seitwärts fahren (Omniwheel)
+# Move sideways (omniwheel)
 ros2 topic pub /cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.5, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 0.0}}"
 
-# Drehen
+# Rotate
 ros2 topic pub /cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: 1.0}}"
 ```
 
-## Konfiguration
+## Configuration
 
-### GPIO-Pins anpassen
-Die L298N BCM GPIO-Zuordnung kann in `MotorControllerNode.py` in der `self.motors`-Liste angepasst werden. ENA/ENB sind Enable/PWM-Eingänge; Jumper müssen dafür entfernt sein. Der separate LED-Hardwaretest ist kein Teil dieser Pin-Zuordnung und darf nicht gleichzeitig mit dem Motorcontroller laufen.
+### Change GPIO pin assignments
 
-### Roboter-Parameter anpassen
+The L298N BCM GPIO assignments can be changed in the `self.motors` list in `MotorControllerNode.py`. ENA/ENB are enable/PWM inputs; remove the jumpers when using them for PWM. The separate LED hardware test is not part of this pin assignment and must not run at the same time as the motor controller.
+
+### Change robot parameters
+
 In `MotorControllerNode.py`:
+
 ```python
-self.wheel_base = 0.2      # Abstand Vorder-/Hinterachse (m)
-self.track_width = 0.2     # Abstand links/rechts (m)
-self.max_speed = 1.0       # Maximale Geschwindigkeit (m/s)
+self.wheel_base = 0.2      # Distance between front and rear axles (m)
+self.track_width = 0.2     # Distance between left and right wheels (m)
+self.max_speed = 1.0       # Maximum speed (m/s)
 ```
 
-## Nicht implementierte Erweiterungen
+## Planned extensions
 
-Diese Funktionen sind mögliche spätere Erweiterungen und setzen passende Hardware sowie geklärte Einheiten und Koordinatenrahmen voraus:
+These features are possible future extensions and require suitable hardware as well as confirmed units and coordinate frames:
 
-- Encoder-Feedback für die Radgeschwindigkeit
-- Odometrie für Position und Orientierung
-- PID-Regelung für die Radgeschwindigkeit
-- Batterie-Status als ROS-Topic; die bestehende Legacy-Implementierung ist ein separates SDK-Skript
+- Wheel-speed feedback using encoders
+- Odometry for position and orientation
+- PID control for wheel speed
+- Battery status as a ROS topic; the existing legacy implementation is a separate SDK script
 
 ## Troubleshooting
 
-### gpiozero Fehler
+### gpiozero errors
 
 Check that the gpiozero package is installed and that the selected GPIO pin factory is available for the Raspberry Pi. The user running the node must have permission to access GPIO.
 
-## Lizenz
+## License
+
 MIT
