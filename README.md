@@ -118,20 +118,13 @@ If `package.xml` dependencies changed, run `rosdep install --from-paths src --ig
 
 The code uses **BCM GPIO numbers**. Physical pin numbers refer to positions on the Raspberry Pi's 40-pin header. Both numbers are listed below; do not confuse them. The GPIO assignments are unchanged from earlier Raspberry Pi models with the same 40-pin header.
 
-| Wheel | L298N input | BCM GPIO | Physical Pi pin |
-| --- | --- | ---: | ---: |
-| Front left | IN A | 5 | 29 |
-| Front left | IN B | 6 | 31 |
-| Front left | ENA / PWM | 12 | 32 |
-| Front right | IN A | 20 | 38 |
-| Front right | IN B | 21 | 40 |
-| Front right | ENB / PWM | 13 | 33 |
-| Rear left | IN A | 23 | 16 |
-| Rear left | IN B | 24 | 18 |
-| Rear left | ENA / PWM | 18 | 12 |
-| Rear right | IN A | 16 | 36 |
-| Rear right | IN B | 26 | 37 |
-| Rear right | ENB / PWM | 19 | 35 |
+### Raspberry Pi 5 GPIO pinout
+
+![Raspberry Pi GPIO pinout showing the robot motor signal assignments](circuit/GPIO-Pinout-Diagram.png)
+
+### L298N motor controller wiring
+
+![L298N motor controller input and output wiring for both modules](<circuit/L298N Motor Controller.png>)
 
 Remove the corresponding jumpers on the L298N modules when using PWM on ENA/ENB. GPIO 18 (physical pin 12) is assigned to the rear-left wheel's enable input; the separate LED PWM test uses the same GPIO and must not run at the same time as motor control.
 
