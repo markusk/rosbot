@@ -6,7 +6,7 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 
 - ROS 2 Jazzy on Ubuntu. For Raspberry Pi installation, see the [ROS 2 Raspberry Pi installation guide](https://docs.ros.org/en/jazzy/How-To-Guides/Installing-on-Raspberry-Pi.html).
 - `colcon` and `rosdep`.
-- On the robot: gpiozero for GPIO control.
+- On the robot: gpiozero for GPIO control and `python3-evdev` for keyboard teleoperation with key-release detection.
 - Optional devices: a Linux-compatible gamepad, a libcamera-supported Raspberry Pi camera with `camera_ros`, and/or a Hokuyo URG-LX04-UG01 with `urg_node`.
 
 ## One-time setup
@@ -47,10 +47,18 @@ Install gpiozero on the Raspberry Pi:
 
 ```bash
 sudo apt-get update
-sudo apt-get install python3-gpiozero
+sudo apt-get install python3-gpiozero python3-evdev
 ```
 
 gpiozero accesses GPIO directly through its selected pin factory and does not require a separate GPIO daemon or systemd service.
+
+The keyboard teleoperation node reads Linux input events so it can stop as soon as a movement key is released. Grant the robot user access to keyboard input devices by adding it to the `input` group, then log out and back in:
+
+```bash
+sudo usermod -aG input "$USER"
+```
+
+Keyboard acceleration settings are ROS parameters stored in `config/teleop.yaml` in the package. The standard launch loads this file automatically. Adjust `start_speed_scale`, `end_speed_scale`, and `acceleration_duration` there; rebuild the package after editing the file.
 
 On any host whose name is not `rosbot`, the motor node does not access GPIO and simulates motor output. Do not set the robot hostname on a development computer.
 
@@ -82,7 +90,7 @@ If the repository is in a different location, replace `~/rosbot` with its path.
 ros2 launch rosbot rosbot_launch.py
 ```
 
-This starts the motor controller, command arbitrator, and keyboard teleoperation. The keyboard node needs an interactive terminal. Press `ESC` in that terminal or `Ctrl+C` in the launch terminal to stop all launched nodes. On the robot, make the first movement tests with the wheels raised and at low speed; the software watchdog is not a physical emergency stop.
+This starts the motor controller, command arbitrator, and keyboard teleoperation. The keyboard node reads Linux input events and requires access to the configured keyboard device; an interactive terminal is not needed for keyboard input. Hold a movement key to drive and release it to stop; press `ESC` on the keyboard or `Ctrl+C` in the launch terminal to stop all launched nodes. On the robot, make the first movement tests with the wheels raised and at low speed; the software watchdog is not a physical emergency stop.
 
 ### Start with optional devices
 

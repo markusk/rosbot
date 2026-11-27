@@ -1,0 +1,9 @@
+/**:
+  ros__parameters:
+    input_device: ''
+    linear_speed: 0.5
+    angular_speed: 1.0
+    start_speed_scale: 0.2
+    end_speed_scale: 1.0
+    acceleration_duration: 2.0
+    speed_increment: 0.1

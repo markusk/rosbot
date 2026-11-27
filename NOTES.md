@@ -8,7 +8,7 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 
 - Active package: `ROS/colcon_workspace/src/rosbot/`.
 - `MotorControllerNode` subscribes to `geometry_msgs/Twist` on `cmd_vel` and controls four L298N channels with gpiozero: BCM direction/enable pins FL 5/6/12, FR 20/21/13, RL 23/24/18, RR 16/26/19. Its configurable `cmd_vel_timeout` watchdog stops the motors after missed commands (default 0.5 seconds).
-- `TeleopKeyboardNode` and `TeleopJoystickNode` publish `Twist`; joystick input is `sensor_msgs/Joy` on `joy`. Keyboard bindings are W/A/S/D for cardinal movement, Q/E/Y/C for diagonals on a German QWERTZ keyboard, J/L for rotation, plus/minus for speed, space to stop, and ESC to exit. The command signs are adapted to the robot's observed wiring and physical directions.
+- `TeleopKeyboardNode` and `TeleopJoystickNode` publish `Twist`; joystick input is `sensor_msgs/Joy` on `joy`. Keyboard bindings are W/A/S/D for cardinal movement, Q/E/Y/C for diagonals on a German QWERTZ keyboard, J/L for rotation, plus/minus for speed, space to stop, and ESC/Ctrl+C to exit. Linux `evdev` key-down/up events let the keyboard node ramp continuously while a movement key is held and stop on release. Start/end scale and acceleration duration are ROS parameters loaded from installed `config/teleop.yaml`; the keyboard node requires `python3-evdev` and input-device permissions.
 - `TeleopArbitratorNode` selects keyboard or joystick velocity commands and publishes the selected command on `cmd_vel`.
 - `LEDPWMNode.py` is retained as a standalone ROS hardware smoke test, not as part of the robot motor GPIO mapping. Its test output pin GPIO 18 is shared with the rear-left motor enable and must not be driven while the L298N motor node is active.
 - `launch/rosbot_launch.py` starts the motor controller, teleoperation arbitrator, and keyboard node; joystick, CSI/libcamera camera, and USB-serial Hokuyo support are optional and default off. Camera and laser drivers start only on hostname `rosbot`; `LEDPWMNode.py` is not included in the main launch.
@@ -27,7 +27,7 @@ ROS 2 control software for a four-wheel omniwheel robot running on a Raspberry P
 
 ## Verified on the Robot
 
-- The project owner reports that keyboard teleoperation now drives the robot correctly in all tested directions, including forward, backward, left, right, diagonals, and rotation.
+- Before the speed-ramp change, the project owner confirmed that keyboard teleoperation drove the robot correctly in all tested directions, including forward, backward, left, right, diagonals, and rotation. The new `evdev` key-release handling and configurable speed ramp have not yet been tested on the robot.
 - The motor driver GPIO assignments and both L298N modules' ENA/ENB and IN1-IN4 connections were checked against the wiring diagrams. The L298N enable jumpers are removed for GPIO-controlled PWM.
 
 ## Known Technical Limitations and Remaining Validation

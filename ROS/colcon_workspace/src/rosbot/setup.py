@@ -28,6 +28,7 @@ setup(
     data_files=[
         (os.path.join('share', package_name), ['package.xml']),
         (os.path.join('share', package_name, 'launch'), glob('launch/*.py')),
+        (os.path.join('share', package_name, 'config'), glob('config/*.yaml')),
         (os.path.join('lib', package_name), glob('scripts/*.py')),
     ],
 )

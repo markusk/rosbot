@@ -55,7 +55,7 @@ The correct fixed transform from the robot base frame to `laser` is still requir
 
 Remove the corresponding jumpers on the L298N modules when using PWM on ENA/ENB. GPIO 18 is assigned to the rear-left wheel's enable input. `LEDPWMNode` is a separate hardware test and must not run at the same time as motor control because it uses the same GPIO. The standard launch does not start the LED node.
 
-The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands. The ROS 2 build and package tests have been completed in a Jazzy virtual machine; physical motor behavior still needs validation on the Raspberry Pi.
+The current wheel mixing assumes the existing four-wheel omniwheel/Mecanum-X arrangement. Confirm the actual wheel type, motor order, polarity, and wiring before driving. Test first with the wheels raised and low velocity commands. The ROS 2 package has been built and keyboard movement has been verified on the Raspberry Pi 5 robot. Camera, laser, joystick, and watchdog hardware behavior may still need separate validation.
 
 ## Nodes
 
@@ -78,11 +78,13 @@ This watchdog is a software fallback, not a replacement for a physical emergency
 
 ### 2. TeleopKeyboardNode
 
-Keyboard control for the robot.
+Keyboard control reads Linux key-down and key-up events from an `evdev` input device, so an interactive terminal is not needed for keyboard input. Hold a movement key to publish commands continuously while they linearly ramp from `start_speed_scale` to `end_speed_scale` over `acceleration_duration`; release it to publish a stop command. On a German QWERTZ keyboard, the physical Y key is handled through Linux key code `KEY_Z`. Use the space bar for an immediate stop and ESC or Ctrl+C to exit.
+
+The default ramp starts at 20% of the configured maximum speed, reaches 100% after 2 seconds, and applies to translation and rotation. These values are ROS parameters loaded from `config/teleop.yaml` by the standard launch file.
 
 **Keys:**
 - W/A/S/D: forward/left/backward/right
-- Q/E/Y/C: diagonal movement (German QWERTZ layout)
+- Q/E/Y/C: diagonal movement (German QWERTZ layout; hold to move, release to stop)
 - J/L: rotate left/right
 - +/-: increase/decrease speed
 - SPACE: stop
@@ -105,10 +107,16 @@ Consumes `sensor_msgs/Joy` on `/joy` and publishes `geometry_msgs/Twist` on `/cm
 
 ```bash
 sudo apt-get update
-sudo apt-get install python3-gpiozero
+sudo apt-get install python3-gpiozero python3-evdev
 ```
 
-gpiozero does not require a separate GPIO daemon.
+gpiozero does not require a separate GPIO daemon. The keyboard node uses `evdev` to detect key release. Grant the robot user access to input devices, for example by adding it to the `input` group and then logging out and back in:
+
+```bash
+sudo usermod -aG input "$USER"
+```
+
+Input device permissions vary by Linux installation. List stable keyboard device paths with `ls -l /dev/input/by-id/`. If automatic keyboard selection does not choose the desired device, configure its `/dev/input/eventX` path using the `input_device` parameter in `config/teleop.yaml`.
 
 ### Build
 
@@ -134,7 +142,7 @@ ros2 launch rosbot rosbot_launch.py joystick_enabled:=true joy_device_id:=0
 
 On a Mac, the launch file does not start the camera node or access GPIO hardware. The Linux `joy_node` requires a supported Linux joystick device; velocity-command simulation can be tested using `/keyboard_cmd_vel` or `/joystick_cmd_vel`.
 
-Pressing `ESC` in the keyboard teleoperation terminal stops the robot and shuts down the entire launch, including the motor, joystick, and arbitration nodes. `Ctrl+C` in the launch terminal also shuts down all launched nodes.
+Pressing `ESC` on the configured keyboard stops the robot and shuts down the entire launch, including the motor, joystick, and arbitration nodes. `Ctrl+C` in the launch terminal also shuts down all launched nodes.
 
 ### Launch individual nodes
 
@@ -175,7 +183,25 @@ ros2 topic pub /cmd_vel geometry_msgs/Twist "{linear: {x: 0.0, y: 0.0, z: 0.0}, 
 
 The L298N BCM GPIO assignments can be changed in the `self.motors` list in `MotorControllerNode.py`. ENA/ENB are enable/PWM inputs; remove the jumpers when using them for PWM. The separate LED hardware test is not part of this pin assignment and must not run at the same time as the motor controller.
 
-### Change robot parameters
+### Configure keyboard teleoperation
+
+Edit `config/teleop.yaml` in the package to configure the keyboard device, maximum linear and angular speeds, start/end speed scales, acceleration duration, and speed-key increment. The standard launch loads this YAML file automatically.
+
+```yaml
+/**:
+  ros__parameters:
+    input_device: ''
+    linear_speed: 0.5
+    angular_speed: 1.0
+    start_speed_scale: 0.2
+    end_speed_scale: 1.0
+    acceleration_duration: 2.0
+    speed_increment: 0.1
+```
+
+The scale values must satisfy `0 <= start_speed_scale <= end_speed_scale <= 1`. To apply a different persistent configuration, edit this YAML file and rebuild the package. For a one-time override without rebuilding, pass launch arguments, for example `ros2 launch rosbot rosbot_launch.py start_speed_scale:=0.1 end_speed_scale:=0.7 acceleration_duration:=3.0`. Parameters are read when the keyboard node starts.
+
+### Change robot kinematic parameters
 
 In `MotorControllerNode.py`:
 
@@ -192,7 +218,7 @@ These features are possible future extensions and require suitable hardware as w
 - Wheel-speed feedback using encoders
 - Odometry for position and orientation
 - PID control for wheel speed
-- Battery status as a ROS topic; the existing legacy implementation is a separate SDK script
+- Battery status as a ROS topic is out of scope because the robot is powered by a power bank
 
 ## Troubleshooting
 
