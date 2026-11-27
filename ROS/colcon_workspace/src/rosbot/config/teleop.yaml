@@ -1,6 +1,8 @@
 /**:
   ros__parameters:
-    input_device: ''
+    input_mode: auto
+    input_device: /dev/input/by-id/usb-Cherry_GmbH_CHERRY_Wired_Keyboard-event-kbd
+    key_repeat_timeout: 0.3
     linear_speed: 0.5
     angular_speed: 1.0
     start_speed_scale: 0.2

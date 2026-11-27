@@ -2,7 +2,14 @@
 
 import pytest
 
-from rosbot.TeleopSpeedRamp import speed_scale
+from rosbot.TeleopSpeedRamp import key_repeat_timed_out, speed_scale
+
+
+def test_terminal_repeat_timeout_expires_after_configured_interval():
+    """Detect when repeated terminal key events have stopped."""
+    assert not key_repeat_timed_out(10.0, 10.29, 0.3)
+    assert key_repeat_timed_out(10.0, 10.3, 0.3)
+    assert not key_repeat_timed_out(None, 10.3, 0.3)
 
 
 def test_speed_scale_starts_at_configured_value():

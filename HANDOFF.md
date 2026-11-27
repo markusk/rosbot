@@ -6,7 +6,7 @@ The active ROS 2 Jazzy package is `ROS/colcon_workspace/src/rosbot`. It provides
 
 The repository's main README includes the Raspberry Pi GPIO pinout and L298N wiring diagrams. The package README is in English and documents package behavior and usage.
 
-Before the latest change, keyboard teleoperation was confirmed on the Raspberry Pi in all tested directions. The bindings are W/A/S/D for cardinal movement, Q/E/Y/C for diagonals on a German QWERTZ keyboard, and J/L for rotation. Direction command signs were adapted to the actual wiring and observed physical directions. Both L298N modules' input and enable GPIO connections were checked against the diagrams; their enable jumpers are removed for PWM control. The latest untested change replaces terminal character input with Linux `evdev` key events to provide configurable acceleration ramps and stop-on-release behavior.
+Before the recent speed-ramp and dual-input changes, keyboard teleoperation was confirmed on the Raspberry Pi in all tested directions. The bindings are W/A/S/D for cardinal movement, Q/E/Y/C for diagonals on a German QWERTZ keyboard, and J/L for rotation. Direction command signs were adapted to the actual wiring and observed physical directions. Both L298N modules' input and enable GPIO connections were checked against the diagrams; their enable jumpers are removed for PWM control. The latest untested changes add configurable speed ramps, local `evdev` key-release handling, and an SSH-compatible terminal fallback that stops after a configurable key-repeat timeout (0.3 seconds, accepted by the project owner). The confirmed Cherry keyboard's stable `/dev/input/by-id/usb-Cherry_GmbH_CHERRY_Wired_Keyboard-event-kbd` path is configured in YAML for local use.
 
 The ROS 2 package has been built successfully on the actual Raspberry Pi 5 robot. Automated package test execution on that device has not been confirmed. Camera and Hokuyo hardware operation and the physical command watchdog remain unverified.
 
@@ -18,7 +18,7 @@ The ROS 2 package has been built successfully on the actual Raspberry Pi 5 robot
 - `ROS/colcon_workspace/src/rosbot/rosbot/`: active ROS 2 nodes.
 - `ROS/colcon_workspace/src/rosbot/launch/rosbot_launch.py`: package launch entry point.
 - `ROS/colcon_workspace/src/rosbot/test/`: package tests, including speed-ramp helper tests.
-- `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`: ROS parameters for keyboard device and speed ramp (20% start scale, 100% end scale, 2-second ramp by default).
+- `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`: ROS parameters for input mode/device, SSH repeat timeout, and speed ramp (20% start scale, 100% end scale, 2-second ramp by default); currently configured with the confirmed Cherry keyboard path.
 - `circuit/GPIO-Pinout-Diagram.png`: Raspberry Pi GPIO wiring diagram.
 - `circuit/L298N Motor Controller.png`: L298N module and motor wiring diagram.
 - `ROS/rosbot.old__TMP!__migrating_to_ros2_!/`: archived ROS 1 implementation; its ROS 1 launch and service files are not active ROS 2 components.

@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
+import os
 import select
+import sys
+import termios
 import time
+import tty
 
 from evdev import InputDevice, ecodes, list_devices
 from geometry_msgs.msg import Twist
 import rclpy
 from rclpy.node import Node
 
-from rosbot.TeleopSpeedRamp import speed_scale
+from rosbot.TeleopSpeedRamp import key_repeat_timed_out, speed_scale
 
 
 class TeleopKeyboardNode(Node):
@@ -15,11 +19,12 @@ class TeleopKeyboardNode(Node):
         super().__init__('TeleopKeyboardNode')
         self.get_logger().info('Keyboard teleoperation node started')
 
-        # Publisher for cmd_vel
         self.publisher = self.create_publisher(
             Twist, 'keyboard_cmd_vel', 10)
 
+        self.declare_parameter('input_mode', 'auto')
         self.declare_parameter('input_device', '')
+        self.declare_parameter('key_repeat_timeout', 0.3)
         self.declare_parameter('linear_speed', 0.5)
         self.declare_parameter('angular_speed', 1.0)
         self.declare_parameter('start_speed_scale', 0.2)
@@ -27,8 +32,11 @@ class TeleopKeyboardNode(Node):
         self.declare_parameter('acceleration_duration', 2.0)
         self.declare_parameter('speed_increment', 0.1)
 
+        self.input_mode = str(self.get_parameter('input_mode').value)
         self.input_device_path = str(
             self.get_parameter('input_device').value)
+        self.key_repeat_timeout = float(
+            self.get_parameter('key_repeat_timeout').value)
         self.linear_speed = float(self.get_parameter('linear_speed').value)
         self.angular_speed = float(
             self.get_parameter('angular_speed').value)
@@ -40,6 +48,12 @@ class TeleopKeyboardNode(Node):
             self.get_parameter('acceleration_duration').value)
         self.speed_increment = float(
             self.get_parameter('speed_increment').value)
+
+        if self.input_mode not in ('auto', 'evdev', 'terminal'):
+            raise ValueError(
+                "input_mode must be 'auto', 'evdev', or 'terminal'")
+        if self.key_repeat_timeout <= 0.0:
+            raise ValueError('key_repeat_timeout must be greater than zero')
         if not (
             0.0 <= self.start_speed_scale
             <= self.end_speed_scale
@@ -54,12 +68,14 @@ class TeleopKeyboardNode(Node):
                 'Acceleration duration and speed increment must be positive')
 
         self.input_device = None
+        self.terminal_settings = None
         self.current_linear_x = 0.0
         self.current_linear_y = 0.0
         self.current_angular_z = 0.0
         self.active_command = None
         self.active_key = None
         self.command_started_at = None
+        self.last_key_input_at = None
         self.current_speed_scale = 0.0
         self.ctrl_pressed = False
         self.shift_pressed = False
@@ -109,17 +125,20 @@ class TeleopKeyboardNode(Node):
         """Open the configured keyboard or find a usable keyboard device."""
         if self.input_device_path:
             self.input_device = InputDevice(self.input_device_path)
+            self.get_logger().info(
+                f'Using configured keyboard: '
+                f'{self.input_device.path} ({self.input_device.name})')
             return
 
         for device_path in list_devices():
             try:
                 device = InputDevice(device_path)
-                capabilities = device.capabilities().get(
-                    ecodes.EV_KEY, [])
+                capabilities = device.capabilities().get(ecodes.EV_KEY, [])
             except OSError as error:
                 self.get_logger().debug(
                     f'Cannot inspect input device {device_path}: {error}')
                 continue
+
             key_codes = {
                 code if isinstance(code, int) else ecodes.ecodes.get(code)
                 for code in capabilities
@@ -142,7 +161,7 @@ class TeleopKeyboardNode(Node):
             'No suitable keyboard found; set the input_device ROS parameter')
 
     def start_motion(self, key_code):
-        """Start a keyboard command associated with a Linux key code."""
+        """Start a keyboard command associated with a key code."""
         motions = {
             ecodes.KEY_W: (-1.0, 0.0, 0.0, 'forward'),
             ecodes.KEY_S: (1.0, 0.0, 0.0, 'backward'),
@@ -159,13 +178,14 @@ class TeleopKeyboardNode(Node):
         if motion is None:
             return False
 
-        if self.active_key == key_code:
-            return True
-        self.active_key = key_code
-        self.active_command = motion[:3]
-        self.command_started_at = time.monotonic()
-        self.current_speed_scale = self.start_speed_scale
-        print(motion[3])
+        now = time.monotonic()
+        if self.active_key != key_code:
+            self.active_key = key_code
+            self.active_command = motion[:3]
+            self.command_started_at = now
+            self.current_speed_scale = self.start_speed_scale
+            print(motion[3])
+        self.last_key_input_at = now
         return True
 
     def publish_active_command(self):
@@ -191,11 +211,12 @@ class TeleopKeyboardNode(Node):
         self.active_key = None
         self.active_command = None
         self.command_started_at = None
+        self.last_key_input_at = None
         self.current_speed_scale = 0.0
         print('STOP')
 
     def handle_key_event(self, event):
-        """Handle key-down and key-up events from the Linux input device."""
+        """Handle key-down and key-up events from an evdev device."""
         if event.type != ecodes.EV_KEY:
             return True
 
@@ -224,18 +245,121 @@ class TeleopKeyboardNode(Node):
         if event.code == ecodes.KEY_SPACE:
             self.stop_motion()
         elif event.code == ecodes.KEY_EQUAL and self.shift_pressed:
-            self.linear_speed += self.speed_increment
-            self.angular_speed += self.speed_increment
-            print(f'Faster: {self.linear_speed:.2f} m/s')
+            self.increase_speed()
         elif event.code == ecodes.KEY_MINUS and not self.shift_pressed:
-            self.linear_speed = max(
-                0.1, self.linear_speed - self.speed_increment)
-            self.angular_speed = max(
-                0.1, self.angular_speed - self.speed_increment)
-            print(f'Slower: {self.linear_speed:.2f} m/s')
+            self.decrease_speed()
         else:
             self.start_motion(event.code)
         return True
+
+    def handle_terminal_character(self, character):
+        """Handle a character read from a local or remote terminal."""
+        if character in ('\x1b', '\x03'):
+            return False
+        if character == ' ':
+            self.stop_motion()
+        elif character in ('+', '='):
+            self.increase_speed()
+        elif character in ('-', '_'):
+            self.decrease_speed()
+        else:
+            terminal_keys = {
+                'w': ecodes.KEY_W,
+                'a': ecodes.KEY_A,
+                's': ecodes.KEY_S,
+                'd': ecodes.KEY_D,
+                'q': ecodes.KEY_Q,
+                'e': ecodes.KEY_E,
+                'y': ecodes.KEY_Z,
+                'c': ecodes.KEY_C,
+                'j': ecodes.KEY_J,
+                'l': ecodes.KEY_L,
+            }
+            key_code = terminal_keys.get(character.lower())
+            if key_code is not None:
+                self.start_motion(key_code)
+        return True
+
+    def increase_speed(self):
+        """Increase the configured linear and angular speed limits."""
+        self.linear_speed += self.speed_increment
+        self.angular_speed += self.speed_increment
+        print(f'Faster: {self.linear_speed:.2f} m/s')
+
+    def decrease_speed(self):
+        """Decrease the configured linear and angular speed limits."""
+        self.linear_speed = max(
+            0.1, self.linear_speed - self.speed_increment)
+        self.angular_speed = max(
+            0.1, self.angular_speed - self.speed_increment)
+        print(f'Slower: {self.linear_speed:.2f} m/s')
+
+    def resolve_input_mode(self):
+        """Choose evdev locally or terminal input in SSH sessions."""
+        if self.input_mode != 'auto':
+            return self.input_mode
+        if any(os.environ.get(name) for name in (
+            'SSH_CONNECTION', 'SSH_TTY', 'SSH_CLIENT'
+        )):
+            return 'terminal'
+        try:
+            self.open_input_device()
+            return 'evdev'
+        except (OSError, RuntimeError) as error:
+            if sys.stdin.isatty():
+                self.get_logger().warning(
+                    f'Cannot use evdev keyboard ({error}); '
+                    'falling back to terminal input')
+                return 'terminal'
+            raise RuntimeError(
+                f'Cannot use evdev keyboard ({error}) and stdin is not a TTY')
+
+    def run_evdev(self):
+        """Read key-down/up events and publish until input ends."""
+        if self.input_device is None:
+            self.open_input_device()
+        self.get_logger().info('Keyboard input mode: evdev')
+        while rclpy.ok():
+            readable, _, _ = select.select(
+                [self.input_device.fd], [], [], 0.02)
+            if readable:
+                for event in self.input_device.read():
+                    if not self.handle_key_event(event):
+                        return
+            if self.active_command is not None:
+                self.publish_active_command()
+
+    def run_terminal(self):
+        """Read terminal characters and stop when key repeats time out."""
+        if not sys.stdin.isatty():
+            raise RuntimeError(
+                'Terminal input mode requires an interactive terminal')
+        fd = sys.stdin.fileno()
+        self.terminal_settings = termios.tcgetattr(fd)
+        tty.setraw(fd)
+        self.get_logger().info(
+            'Keyboard input mode: terminal '
+            f'(stop timeout {self.key_repeat_timeout:.2f} seconds)')
+        try:
+            while rclpy.ok():
+                readable, _, _ = select.select([fd], [], [], 0.02)
+                if readable:
+                    character = os.read(fd, 1).decode(
+                        'utf-8', errors='ignore')
+                    if not self.handle_terminal_character(character):
+                        return
+                if self.active_command is not None:
+                    if key_repeat_timed_out(
+                        self.last_key_input_at,
+                        time.monotonic(),
+                        self.key_repeat_timeout,
+                    ):
+                        self.stop_motion()
+                    else:
+                        self.publish_active_command()
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, self.terminal_settings)
+            self.terminal_settings = None
 
     def publish_twist(self, linear_x=0.0, linear_y=0.0, angular_z=0.0):
         """Publish a velocity command."""
@@ -250,25 +374,24 @@ class TeleopKeyboardNode(Node):
         self.current_angular_z = angular_z
 
     def run(self):
-        """Read Linux key events and publish the acceleration ramp."""
+        """Select keyboard input mode and publish commands until stopped."""
         try:
-            self.open_input_device()
-            while rclpy.ok():
-                readable, _, _ = select.select(
-                    [self.input_device.fd], [], [], 0.02)
-                if readable:
-                    for event in self.input_device.read():
-                        if not self.handle_key_event(event):
-                            return
-
-                if self.active_command is not None:
-                    self.publish_active_command()
-
+            mode = self.resolve_input_mode()
+            if mode == 'evdev':
+                self.run_evdev()
+            else:
+                self.run_terminal()
         except Exception as error:
             self.get_logger().error(
                 f'Keyboard teleoperation failed: {error}')
         finally:
             self.publish_twist()
+            if self.terminal_settings is not None:
+                termios.tcsetattr(
+                    sys.stdin.fileno(),
+                    termios.TCSADRAIN,
+                    self.terminal_settings,
+                )
             if self.input_device is not None:
                 self.input_device.close()
 

@@ -78,7 +78,7 @@ This watchdog is a software fallback, not a replacement for a physical emergency
 
 ### 2. TeleopKeyboardNode
 
-Keyboard control reads Linux key-down and key-up events from an `evdev` input device, so an interactive terminal is not needed for keyboard input. Hold a movement key to publish commands continuously while they linearly ramp from `start_speed_scale` to `end_speed_scale` over `acceleration_duration`; release it to publish a stop command. On a German QWERTZ keyboard, the physical Y key is handled through Linux key code `KEY_Z`. Use the space bar for an immediate stop and ESC or Ctrl+C to exit.
+Keyboard control supports local keyboards through Linux `evdev` key-down/up events and remote SSH terminals through terminal input. The default `input_mode: auto` selects terminal input in SSH sessions, otherwise tries `evdev` and falls back to an interactive terminal if no local input device is accessible. Hold a movement key to publish commands continuously while they ramp from `start_speed_scale` to `end_speed_scale`; release the key to stop immediately in `evdev` mode. Terminal mode has no key-release event, so it stops after `key_repeat_timeout` seconds without a repeated character (0.3 seconds by default). On a German QWERTZ keyboard, the physical Y key maps to Linux key code `KEY_Z`. SPACE stops immediately; ESC or Ctrl+C exits.
 
 The default ramp starts at 20% of the configured maximum speed, reaches 100% after 2 seconds, and applies to translation and rotation. These values are ROS parameters loaded from `config/teleop.yaml` by the standard launch file.
 
@@ -116,7 +116,7 @@ gpiozero does not require a separate GPIO daemon. The keyboard node uses `evdev`
 sudo usermod -aG input "$USER"
 ```
 
-Input device permissions vary by Linux installation. List stable keyboard device paths with `ls -l /dev/input/by-id/`. If automatic keyboard selection does not choose the desired device, configure its `/dev/input/eventX` path using the `input_device` parameter in `config/teleop.yaml`.
+Input device permissions vary by Linux installation. List stable keyboard device paths with `ls -l /dev/input/by-id/`. The supplied configuration uses the Cherry keyboard's stable `event-kbd` path. Update `input_device` in `config/teleop.yaml` if your keyboard has a different path. Set it to an empty string to let the node search for a keyboard automatically.
 
 ### Build
 
@@ -185,12 +185,14 @@ The L298N BCM GPIO assignments can be changed in the `self.motors` list in `Moto
 
 ### Configure keyboard teleoperation
 
-Edit `config/teleop.yaml` in the package to configure the keyboard device, maximum linear and angular speeds, start/end speed scales, acceleration duration, and speed-key increment. The standard launch loads this YAML file automatically.
+Edit `config/teleop.yaml` in the package to configure the input mode (`auto`, `evdev`, or `terminal`), keyboard device, terminal repeat timeout, maximum linear and angular speeds, start/end speed scales, acceleration duration, and speed-key increment. The standard launch loads this YAML file automatically.
 
 ```yaml
 /**:
   ros__parameters:
-    input_device: ''
+    input_mode: auto
+    input_device: /dev/input/by-id/usb-Cherry_GmbH_CHERRY_Wired_Keyboard-event-kbd
+    key_repeat_timeout: 0.3
     linear_speed: 0.5
     angular_speed: 1.0
     start_speed_scale: 0.2

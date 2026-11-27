@@ -52,13 +52,13 @@ sudo apt-get install python3-gpiozero python3-evdev
 
 gpiozero accesses GPIO directly through its selected pin factory and does not require a separate GPIO daemon or systemd service.
 
-The keyboard teleoperation node reads Linux input events so it can stop as soon as a movement key is released. Grant the robot user access to keyboard input devices by adding it to the `input` group, then log out and back in:
+The keyboard teleoperation node uses Linux input events for direct-attached keyboards and falls back to terminal input for SSH sessions or inaccessible local devices. For immediate key-release detection on a directly attached keyboard, grant the robot user access to input devices by adding it to the `input` group, then log out and back in:
 
 ```bash
 sudo usermod -aG input "$USER"
 ```
 
-Keyboard acceleration settings are ROS parameters stored in `config/teleop.yaml` in the package. The standard launch loads this file automatically. Adjust `start_speed_scale`, `end_speed_scale`, and `acceleration_duration` there; rebuild the package after editing the file.
+Keyboard settings are ROS parameters stored in `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`. The standard launch loads this file automatically. Configure `input_mode` as `auto`, `evdev`, or `terminal`, and adjust `key_repeat_timeout`, `start_speed_scale`, `end_speed_scale`, and `acceleration_duration`; rebuild the package after editing the file. Terminal mode stops after a short pause without repeated key characters (0.3 seconds by default); local `evdev` mode stops on key release.
 
 On any host whose name is not `rosbot`, the motor node does not access GPIO and simulates motor output. Do not set the robot hostname on a development computer.
 
