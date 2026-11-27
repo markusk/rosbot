@@ -10,17 +10,18 @@
 
     # Translation settings: W/A/S/D and Q/E/Y/C (m/s).
     # These limits and scales do not control rotation.
-    linear_speed: 0.5
-    start_speed_scale: 0.2
+    linear_speed: 0.6
+    start_speed_scale: 0.5
     end_speed_scale: 1.0
 
     # Rotation settings: J/L only (rad/s).
     # The end value here is a rotation rate, not a linear speed in m/s.
-    angular_speed: 1.3
-    angular_start_speed_scale: 0.2
+    angular_speed: 2.3
+    angular_start_speed_scale: 0.6
     angular_end_speed_scale: 1.0
 
     # Separate key-down-to-maximum ramp duration for translation and rotation.
     acceleration_duration: 2.0
     # +/- changes both linear_speed (m/s) and angular_speed (rad/s).
     speed_increment: 0.1
+    
