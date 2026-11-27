@@ -28,6 +28,15 @@ def test_speed_scale_reaches_end_value():
     assert speed_scale(0.2, 1.0, 2.0, 5.0) == pytest.approx(1.0)
 
 
+def test_rotation_can_use_a_separate_speed_ramp():
+    """Support rotation thresholds independently from translation."""
+    linear_scale = speed_scale(0.2, 1.0, 2.0, 1.0)
+    angular_scale = speed_scale(0.2, 0.8, 2.0, 1.0)
+
+    assert linear_scale == pytest.approx(0.6)
+    assert angular_scale == pytest.approx(0.5)
+
+
 def test_non_positive_duration_uses_end_value():
     """Avoid division by zero for an invalid duration."""
     assert speed_scale(0.2, 1.0, 0.0, 0.0) == 1.0

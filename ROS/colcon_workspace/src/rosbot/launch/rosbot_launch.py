@@ -30,6 +30,9 @@ def generate_launch_description():
     laser_frame_id = LaunchConfiguration('laser_frame_id')
     start_speed_scale = LaunchConfiguration('start_speed_scale')
     end_speed_scale = LaunchConfiguration('end_speed_scale')
+    angular_start_speed_scale = LaunchConfiguration(
+        'angular_start_speed_scale')
+    angular_end_speed_scale = LaunchConfiguration('angular_end_speed_scale')
     acceleration_duration = LaunchConfiguration('acceleration_duration')
     keyboard_node = Node(
         package='rosbot',
@@ -44,6 +47,10 @@ def generate_launch_description():
                     start_speed_scale, value_type=float),
                 'end_speed_scale': ParameterValue(
                     end_speed_scale, value_type=float),
+                'angular_start_speed_scale': ParameterValue(
+                    angular_start_speed_scale, value_type=float),
+                'angular_end_speed_scale': ParameterValue(
+                    angular_end_speed_scale, value_type=float),
                 'acceleration_duration': ParameterValue(
                     acceleration_duration, value_type=float),
             },
@@ -59,6 +66,10 @@ def generate_launch_description():
         DeclareLaunchArgument('laser_frame_id', default_value='laser'),
         DeclareLaunchArgument('start_speed_scale', default_value='0.2'),
         DeclareLaunchArgument('end_speed_scale', default_value='1.0'),
+        DeclareLaunchArgument(
+            'angular_start_speed_scale', default_value='0.2'),
+        DeclareLaunchArgument(
+            'angular_end_speed_scale', default_value='1.0'),
         DeclareLaunchArgument('acceleration_duration', default_value='2.0'),
         RegisterEventHandler(
             OnProcessExit(

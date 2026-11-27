@@ -26,9 +26,11 @@ class TeleopKeyboardNode(Node):
         self.declare_parameter('input_device', '')
         self.declare_parameter('key_repeat_timeout', 0.3)
         self.declare_parameter('linear_speed', 0.5)
-        self.declare_parameter('angular_speed', 1.0)
+        self.declare_parameter('angular_speed', 1.3)
         self.declare_parameter('start_speed_scale', 0.2)
         self.declare_parameter('end_speed_scale', 1.0)
+        self.declare_parameter('angular_start_speed_scale', 0.2)
+        self.declare_parameter('angular_end_speed_scale', 1.0)
         self.declare_parameter('acceleration_duration', 2.0)
         self.declare_parameter('speed_increment', 0.1)
 
@@ -44,6 +46,10 @@ class TeleopKeyboardNode(Node):
             self.get_parameter('start_speed_scale').value)
         self.end_speed_scale = float(
             self.get_parameter('end_speed_scale').value)
+        self.angular_start_speed_scale = float(
+            self.get_parameter('angular_start_speed_scale').value)
+        self.angular_end_speed_scale = float(
+            self.get_parameter('angular_end_speed_scale').value)
         self.acceleration_duration = float(
             self.get_parameter('acceleration_duration').value)
         self.speed_increment = float(
@@ -61,6 +67,13 @@ class TeleopKeyboardNode(Node):
         ):
             raise ValueError(
                 'Speed scales must satisfy 0 <= start <= end <= 1')
+        if not (
+            0.0 <= self.angular_start_speed_scale
+            <= self.angular_end_speed_scale
+            <= 1.0
+        ):
+            raise ValueError(
+                'Angular scales must satisfy 0 <= start <= end <= 1')
         if self.linear_speed <= 0.0 or self.angular_speed <= 0.0:
             raise ValueError('Linear and angular speeds must be positive')
         if self.acceleration_duration <= 0.0 or self.speed_increment <= 0.0:
@@ -203,7 +216,15 @@ class TeleopKeyboardNode(Node):
             linear_x=linear_x * self.linear_speed * self.current_speed_scale,
             linear_y=linear_y * self.linear_speed * self.current_speed_scale,
             angular_z=(
-                angular_z * self.angular_speed * self.current_speed_scale),
+                angular_z
+                * self.angular_speed
+                * speed_scale(
+                    self.angular_start_speed_scale,
+                    self.angular_end_speed_scale,
+                    self.acceleration_duration,
+                    elapsed,
+                )
+            ),
         )
 
     def stop_motion(self):

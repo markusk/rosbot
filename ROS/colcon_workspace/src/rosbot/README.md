@@ -80,7 +80,17 @@ This watchdog is a software fallback, not a replacement for a physical emergency
 
 Keyboard control supports local keyboards through Linux `evdev` key-down/up events and remote SSH terminals through terminal input. The default `input_mode: auto` selects terminal input in SSH sessions, otherwise tries `evdev` and falls back to an interactive terminal if no local input device is accessible. Terminal input opens the controlling `/dev/tty`, which allows it to work when the ROS launch process redirects standard input. Hold a movement key to publish commands continuously while they ramp from `start_speed_scale` to `end_speed_scale`; release the key to stop immediately in `evdev` mode. Terminal mode has no key-release event, so it stops after `key_repeat_timeout` seconds without a repeated character (0.3 seconds by default). On a German QWERTZ keyboard, the physical Y key maps to Linux key code `KEY_Z`. SPACE stops immediately; ESC or Ctrl+C exits.
 
-The default ramp starts at 20% of the configured maximum speed, reaches 100% after 2 seconds, and applies to translation and rotation. These values are ROS parameters loaded from `config/teleop.yaml` by the standard launch file.
+The two speed ramps control different kinds of movement:
+
+| Keys and movement | Maximum-speed setting | Start setting | End setting | Default actual speed |
+| --- | --- | --- | --- | --- |
+| W/A/S/D: forward, backward, left, right | `linear_speed` (m/s) | `start_speed_scale` | `end_speed_scale` | Starts at 0.10 m/s and reaches 0.50 m/s after 2 seconds. |
+| Q/E/Y/C: diagonal movement | `linear_speed` (m/s) | `start_speed_scale` | `end_speed_scale` | Uses the same translation ramp; both movement components are scaled. |
+| J/L: rotate left/right | `angular_speed` (rad/s) | `angular_start_speed_scale` | `angular_end_speed_scale` | Starts at 0.26 rad/s and reaches 1.30 rad/s after 2 seconds. |
+
+In simple terms: `linear_speed` and the non-angular `start_speed_scale`/`end_speed_scale` values are for driving across the floor. The `angular_speed` and `angular_start_speed_scale`/`angular_end_speed_scale` values are only for turning in place with J/L. The angular value is a turn rate in rad/s, **not** a travel speed in m/s. The scale values are multipliers: `0.2` means 20% of that movement's maximum, and `1.0` means 100%.
+
+All values are ROS parameters loaded from `config/teleop.yaml` by the standard launch file. Changing the persistent YAML configuration requires rebuilding the package.
 
 **Keys:**
 - W/A/S/D: forward/left/backward/right
@@ -190,18 +200,35 @@ Edit `config/teleop.yaml` in the package to configure the input mode (`auto`, `e
 ```yaml
 /**:
   ros__parameters:
+    # Select input automatically: local Linux keyboard, or terminal/SSH.
     input_mode: auto
+    # Stable device path for the Cherry keyboard connected to the robot.
+    # Leave empty to search automatically for a local keyboard.
     input_device: /dev/input/by-id/usb-Cherry_GmbH_CHERRY_Wired_Keyboard-event-kbd
+    # In terminal/SSH mode, stop when no repeated key arrives for this long.
     key_repeat_timeout: 0.3
+
+    # Translation: forward/backward, left/right, and diagonals (m/s).
     linear_speed: 0.5
-    angular_speed: 1.0
     start_speed_scale: 0.2
     end_speed_scale: 1.0
+
+    # Rotation with J/L only (rad/s), independently adjustable from driving.
+    angular_speed: 1.3
+    angular_start_speed_scale: 0.2
+    angular_end_speed_scale: 1.0
+
+    # Time for either ramp to progress from its start to end scale.
     acceleration_duration: 2.0
+    # +/- changes both linear_speed (m/s) and angular_speed (rad/s).
     speed_increment: 0.1
 ```
 
-The scale values must satisfy `0 <= start_speed_scale <= end_speed_scale <= 1`. To apply a different persistent configuration, edit this YAML file and rebuild the package. For a one-time override without rebuilding, pass launch arguments, for example `ros2 launch rosbot rosbot_launch.py start_speed_scale:=0.1 end_speed_scale:=0.7 acceleration_duration:=3.0`. Parameters are read when the keyboard node starts.
+The translation settings (`linear_speed`, `start_speed_scale`, `end_speed_scale`) control W/A/S/D and diagonal Q/E/Y/C. With the defaults above, translation starts at `0.5 * 0.2 = 0.10 m/s` and reaches `0.5 * 1.0 = 0.50 m/s` after 2 seconds.
+
+The separate rotation settings (`angular_speed`, `angular_start_speed_scale`, `angular_end_speed_scale`) control only J/L. With the defaults above, turning starts at `1.3 * 0.2 = 0.26 rad/s` and reaches `1.3 * 1.0 = 1.30 rad/s` after 2 seconds. **This is angular speed in rad/s, not linear travel speed in m/s.**
+
+Scale values are multipliers: `0.2` means 20% of the corresponding maximum, and `1.0` means 100%. Both scale pairs must satisfy `0 <= start <= end <= 1`. To apply a different persistent configuration, edit this YAML file and rebuild the package. For a one-time override without rebuilding, pass launch arguments, for example `ros2 launch rosbot rosbot_launch.py start_speed_scale:=0.1 end_speed_scale:=0.7 angular_start_speed_scale:=0.3 angular_end_speed_scale:=1.0 acceleration_duration:=3.0`. Parameters are read when the keyboard node starts.
 
 ### Change robot kinematic parameters
 

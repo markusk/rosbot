@@ -58,7 +58,7 @@ The keyboard teleoperation node uses Linux input events for direct-attached keyb
 sudo usermod -aG input "$USER"
 ```
 
-Keyboard settings are ROS parameters stored in `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`. The standard launch loads this file automatically. Configure `input_mode` as `auto`, `evdev`, or `terminal`, and adjust `key_repeat_timeout`, `start_speed_scale`, `end_speed_scale`, and `acceleration_duration`; rebuild the package after editing the file. Terminal mode stops after a short pause without repeated key characters (0.3 seconds by default); local `evdev` mode stops on key release.
+Keyboard settings are ROS parameters stored in `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`. The standard launch loads this file automatically. Configure `input_mode` as `auto`, `evdev`, or `terminal`, and adjust `key_repeat_timeout`, the separate translation and angular ramp scales, `angular_speed`, and `acceleration_duration`; rebuild the package after editing the file. Terminal mode stops after a short pause without repeated key characters (0.3 seconds by default); local `evdev` mode stops on key release.
 
 On any host whose name is not `rosbot`, the motor node does not access GPIO and simulates motor output. Do not set the robot hostname on a development computer.
 

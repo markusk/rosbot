@@ -18,7 +18,7 @@ The ROS 2 package has been built successfully on the actual Raspberry Pi 5 robot
 - `ROS/colcon_workspace/src/rosbot/rosbot/`: active ROS 2 nodes.
 - `ROS/colcon_workspace/src/rosbot/launch/rosbot_launch.py`: package launch entry point.
 - `ROS/colcon_workspace/src/rosbot/test/`: package tests, including speed-ramp helper tests.
-- `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`: ROS parameters for input mode/device, SSH repeat timeout, and speed ramp (20% start scale, 100% end scale, 2-second ramp by default); currently configured with the confirmed Cherry keyboard path.
+- `ROS/colcon_workspace/src/rosbot/config/teleop.yaml`: ROS parameters for input mode/device, SSH repeat timeout, and speed ramp (separate translation/angular scales, 20% start and 100% end by default, 2-second ramp); currently configured with the confirmed Cherry keyboard path and angular speed of 1.3 rad/s.
 - `circuit/GPIO-Pinout-Diagram.png`: Raspberry Pi GPIO wiring diagram.
 - `circuit/L298N Motor Controller.png`: L298N module and motor wiring diagram.
 - `ROS/rosbot.old__TMP!__migrating_to_ros2_!/`: archived ROS 1 implementation; its ROS 1 launch and service files are not active ROS 2 components.
