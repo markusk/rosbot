@@ -4,20 +4,32 @@
 
 The active ROS 2 Jazzy package is `ROS/colcon_workspace/src/rosbot`. It provides motor control using gpiozero, keyboard and joystick teleoperation, command arbitration, and a command-velocity watchdog. Optional launch support is available for a Raspberry Pi camera through `camera_ros` and a Hokuyo scanner through `urg_node`. The ROS 1 directory is an archive and is not part of the active colcon build.
 
-The ROS 2 build and package tests have been completed successfully in a Jazzy virtual machine, as reported by the project owner. Physical motor and sensor behavior has not been verified because the robot is currently unavailable.
+The repository's main README includes the Raspberry Pi GPIO pinout and L298N wiring diagrams. The package README is in English and documents package behavior and usage.
+
+Keyboard teleoperation has been tested successfully on the Raspberry Pi: the robot drives as expected in all tested directions. The bindings are W/A/S/D for cardinal movement, Q/E/Y/C for diagonals on a German QWERTZ keyboard, and J/L for rotation. Direction command signs were adapted to the actual wiring and observed physical directions. Both L298N modules' input and enable GPIO connections were checked against the diagrams; their enable jumpers are removed for PWM control.
+
+The ROS 2 package has been built successfully on the actual Raspberry Pi 5 robot. Automated package test execution on that device has not been confirmed. Camera and Hokuyo hardware operation and the physical command watchdog remain unverified.
 
 ## Relevant Files
 
-- `README.md`: repository setup, build, and launch instructions.
+- `README.md`: repository setup, build, launch instructions, and GPIO/L298N wiring diagrams.
+- `NOTES.md`: project architecture, decisions, and verified robot status.
 - `ROS/colcon_workspace/src/rosbot/README.md`: package behavior, migration status, usage, and hardware limitations.
 - `ROS/colcon_workspace/src/rosbot/rosbot/`: active ROS 2 nodes.
 - `ROS/colcon_workspace/src/rosbot/launch/rosbot_launch.py`: package launch entry point.
 - `ROS/colcon_workspace/src/rosbot/test/`: package tests.
+- `circuit/GPIO-Pinout-Diagram.png`: Raspberry Pi GPIO wiring diagram.
+- `circuit/L298N Motor Controller.png`: L298N module and motor wiring diagram.
 - `ROS/rosbot.old__TMP!__migrating_to_ros2_!/`: archived ROS 1 implementation; its ROS 1 launch and service files are not active ROS 2 components.
 
 ## Remaining Work
 
-- On the robot, verify L298N wiring, motor order and polarity, BCM pin assignments, wheel layout, and low-speed movement with the wheels raised. The standalone LED GPIO test must not run while the motor controller is active because GPIO 18 is shared.
-- Test the 0.5-second `cmd_vel_timeout` behavior on hardware, including stop and recovery. It is a software fallback, not a physical emergency stop.
-- Verify the installed camera module and libcamera compatibility, Hokuyo serial path and baud rate, and measure the base-to-laser transform. The code supports these devices, but their physical connection and operation are unverified.
-- Encoder feedback, odometry, PID speed control, and battery publishing are not implemented in the active ROS 2 package. Revisit these after confirming the required hardware, units, and coordinate frames.
+- If further hardware validation is needed, test the `cmd_vel_timeout` stop/recovery behavior on the robot. It is a software fallback, not a physical emergency stop.
+- Verify joystick direction mapping and stop behavior if joystick control will be used.
+- Verify the installed camera module and libcamera compatibility, Hokuyo serial path and baud rate, and measure the base-to-laser transform before using those optional devices.
+- Encoder feedback, odometry, and PID speed control are not implemented in the active ROS 2 package. Revisit these after confirming the required hardware, units, and coordinate frames.
+- Battery-state publishing is out of scope because the robot is powered by a power bank.
+
+## Git / Working Tree
+
+At the time of this handoff, `HEAD` and `origin/master` are both at `c2da422` (`updated teleop keyboard layout togerman QWERTZ`). The only untracked files observed are `circuit/GPIO-Pinout-Diagram.af` and `circuit/L298N Motor Controller.af`; they were not changed as part of this handoff update.
