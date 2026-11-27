@@ -65,7 +65,7 @@ mkdir -p ~/.config/rosbot
 cp "$(ros2 pkg prefix rosbot)/share/rosbot/config/teleop.yaml" ~/.config/rosbot/teleop.yaml
 ```
 
-Edit the personal file and restart the launch to apply changes; no rebuild is needed for edits to this external file. An alternate file can be selected with `teleop_config:=/path/to/teleop.yaml`. Configure `input_mode` as `auto`, `evdev`, or `terminal`, `key_repeat_timeout`, the separate translation and angular ramp scales, `angular_speed`, and `acceleration_duration`. Terminal mode stops after a short pause without repeated key characters (0.3 seconds by default); local `evdev` mode stops on key release.
+Edit the personal file and restart the launch to apply changes; no rebuild is needed for edits to this external file. At startup, the launch prints the selected configuration path. An alternate file can be selected with `teleop_config:=/path/to/teleop.yaml`. Configure `input_mode` as `auto`, `evdev`, or `terminal`, `key_repeat_timeout`, the separate translation and angular ramp scales, `angular_speed`, and `acceleration_duration`. Terminal mode stops after a short pause without repeated key characters (0.3 seconds by default); local `evdev` mode stops on key release.
 
 On any host whose name is not `rosbot`, the motor node does not access GPIO and simulates motor output. Do not set the robot hostname on a development computer.
 

@@ -97,7 +97,7 @@ mkdir -p ~/.config/rosbot
 cp "$(ros2 pkg prefix rosbot)/share/rosbot/config/teleop.yaml" ~/.config/rosbot/teleop.yaml
 ```
 
-After that, edit the personal file and restart the launch to apply changes; no package rebuild is needed. You can choose a different file with `teleop_config:=/path/to/teleop.yaml`.
+After that, edit the personal file and restart the launch to apply changes; no package rebuild is needed. At startup the launch prints `Keyboard teleoperation config: ...` with the resolved path it passes to the keyboard node. You can choose a different file with `teleop_config:=/path/to/teleop.yaml`.
 
 **Keys:**
 - W/A/S/D: forward/left/backward/right

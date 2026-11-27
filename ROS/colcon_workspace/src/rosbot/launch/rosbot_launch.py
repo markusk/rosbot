@@ -6,6 +6,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.actions import EmitEvent
+from launch.actions import LogInfo
 from launch.actions import RegisterEventHandler
 from launch.conditions import IfCondition
 from launch.event_handlers import OnProcessExit
@@ -56,6 +57,7 @@ def generate_launch_description():
                 'Path to the ROS parameter YAML file for keyboard '
                 'teleoperation'),
         ),
+        LogInfo(msg=['Keyboard teleoperation config: ', teleop_config]),
         RegisterEventHandler(
             OnProcessExit(
                 target_action=keyboard_node,
