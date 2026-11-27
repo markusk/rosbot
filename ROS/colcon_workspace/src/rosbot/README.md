@@ -90,7 +90,14 @@ The two speed ramps control different kinds of movement:
 
 In simple terms: `linear_speed` and the non-angular `start_speed_scale`/`end_speed_scale` values are for driving across the floor. The `angular_speed` and `angular_start_speed_scale`/`angular_end_speed_scale` values are only for turning in place with J/L. The angular value is a turn rate in rad/s, **not** a travel speed in m/s. The scale values are multipliers: `0.2` means 20% of that movement's maximum, and `1.0` means 100%.
 
-All values are ROS parameters loaded from `config/teleop.yaml` by the standard launch file. Changing the persistent YAML configuration requires rebuilding the package.
+All values are ROS parameters loaded from a YAML file when the standard launch starts. The launch uses `~/.config/rosbot/teleop.yaml` if it exists; otherwise it falls back to the package template at `config/teleop.yaml`. Create a personal copy once with:
+
+```bash
+mkdir -p ~/.config/rosbot
+cp "$(ros2 pkg prefix rosbot)/share/rosbot/config/teleop.yaml" ~/.config/rosbot/teleop.yaml
+```
+
+After that, edit the personal file and restart the launch to apply changes; no package rebuild is needed. You can choose a different file with `teleop_config:=/path/to/teleop.yaml`.
 
 **Keys:**
 - W/A/S/D: forward/left/backward/right

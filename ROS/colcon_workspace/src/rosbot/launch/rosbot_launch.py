@@ -18,9 +18,16 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     """Describe the core robot nodes and optional joystick input."""
-    package_share = get_package_share_directory('rosbot')
-    teleop_parameters = os.path.join(
-        package_share, 'config', 'teleop.yaml')
+    user_teleop_config = os.path.expanduser(
+        '~/.config/rosbot/teleop.yaml')
+    package_teleop_config = os.path.join(
+        get_package_share_directory('rosbot'), 'config', 'teleop.yaml')
+    default_teleop_config = (
+        user_teleop_config
+        if os.path.isfile(user_teleop_config)
+        else package_teleop_config
+    )
+    teleop_config = LaunchConfiguration('teleop_config')
     joystick_enabled = LaunchConfiguration('joystick_enabled')
     joy_device_id = LaunchConfiguration('joy_device_id')
     camera_enabled = LaunchConfiguration('camera_enabled')
@@ -28,33 +35,13 @@ def generate_launch_description():
     laser_device = LaunchConfiguration('laser_device')
     laser_baud = LaunchConfiguration('laser_baud')
     laser_frame_id = LaunchConfiguration('laser_frame_id')
-    start_speed_scale = LaunchConfiguration('start_speed_scale')
-    end_speed_scale = LaunchConfiguration('end_speed_scale')
-    angular_start_speed_scale = LaunchConfiguration(
-        'angular_start_speed_scale')
-    angular_end_speed_scale = LaunchConfiguration('angular_end_speed_scale')
-    acceleration_duration = LaunchConfiguration('acceleration_duration')
     keyboard_node = Node(
         package='rosbot',
         executable='TeleopKeyboardNode',
         name='teleop_keyboard',
         output='screen',
         emulate_tty=True,
-        parameters=[
-            teleop_parameters,
-            {
-                'start_speed_scale': ParameterValue(
-                    start_speed_scale, value_type=float),
-                'end_speed_scale': ParameterValue(
-                    end_speed_scale, value_type=float),
-                'angular_start_speed_scale': ParameterValue(
-                    angular_start_speed_scale, value_type=float),
-                'angular_end_speed_scale': ParameterValue(
-                    angular_end_speed_scale, value_type=float),
-                'acceleration_duration': ParameterValue(
-                    acceleration_duration, value_type=float),
-            },
-        ],
+        parameters=[teleop_config],
     )
     nodes = [
         DeclareLaunchArgument('joystick_enabled', default_value='false'),
@@ -63,14 +50,12 @@ def generate_launch_description():
         DeclareLaunchArgument('laser_enabled', default_value='false'),
         DeclareLaunchArgument('laser_device', default_value='/dev/ttyACM0'),
         DeclareLaunchArgument('laser_baud', default_value='115200'),
-        DeclareLaunchArgument('laser_frame_id', default_value='laser'),
-        DeclareLaunchArgument('start_speed_scale', default_value='0.2'),
-        DeclareLaunchArgument('end_speed_scale', default_value='1.0'),
         DeclareLaunchArgument(
-            'angular_start_speed_scale', default_value='0.2'),
-        DeclareLaunchArgument(
-            'angular_end_speed_scale', default_value='1.0'),
-        DeclareLaunchArgument('acceleration_duration', default_value='2.0'),
+            'teleop_config', default_value=default_teleop_config,
+            description=(
+                'Path to the ROS parameter YAML file for keyboard '
+                'teleoperation'),
+        ),
         RegisterEventHandler(
             OnProcessExit(
                 target_action=keyboard_node,
