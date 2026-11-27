@@ -68,6 +68,7 @@ class TeleopKeyboardNode(Node):
                 'Acceleration duration and speed increment must be positive')
 
         self.input_device = None
+        self.terminal_input = None
         self.terminal_settings = None
         self.current_linear_x = 0.0
         self.current_linear_y = 0.0
@@ -331,10 +332,15 @@ class TeleopKeyboardNode(Node):
 
     def run_terminal(self):
         """Read terminal characters and stop when key repeats time out."""
-        if not sys.stdin.isatty():
-            raise RuntimeError(
-                'Terminal input mode requires an interactive terminal')
-        fd = sys.stdin.fileno()
+        try:
+            self.terminal_input = open('/dev/tty', 'rb', buffering=0)
+        except OSError:
+            if not sys.stdin.isatty():
+                raise RuntimeError(
+                    'No controlling terminal available for keyboard input')
+            self.terminal_input = sys.stdin.buffer
+
+        fd = self.terminal_input.fileno()
         self.terminal_settings = termios.tcgetattr(fd)
         tty.setraw(fd)
         self.get_logger().info(
@@ -360,6 +366,9 @@ class TeleopKeyboardNode(Node):
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, self.terminal_settings)
             self.terminal_settings = None
+            if self.terminal_input is not sys.stdin.buffer:
+                self.terminal_input.close()
+            self.terminal_input = None
 
     def publish_twist(self, linear_x=0.0, linear_y=0.0, angular_z=0.0):
         """Publish a velocity command."""
@@ -386,12 +395,14 @@ class TeleopKeyboardNode(Node):
                 f'Keyboard teleoperation failed: {error}')
         finally:
             self.publish_twist()
-            if self.terminal_settings is not None:
+            if self.terminal_settings is not None and self.terminal_input:
                 termios.tcsetattr(
-                    sys.stdin.fileno(),
+                    self.terminal_input.fileno(),
                     termios.TCSADRAIN,
                     self.terminal_settings,
                 )
+            if self.terminal_input is not None:
+                self.terminal_input.close()
             if self.input_device is not None:
                 self.input_device.close()
 
