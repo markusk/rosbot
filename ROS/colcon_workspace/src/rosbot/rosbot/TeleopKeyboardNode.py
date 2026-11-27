@@ -46,7 +46,7 @@ class TeleopKeyboardNode(Node):
         ║                                    ║
         ║   Q: left forward diagonal         ║
         ║   E: right forward diagonal        ║
-        ║   Z: left backward diagonal        ║
+        ║   Y: left backward diagonal        ║
         ║   C: right backward diagonal       ║
         ║                                    ║
         ║   Speed:                           ║
@@ -123,7 +123,7 @@ class TeleopKeyboardNode(Node):
                         linear_x=-self.linear_speed,
                         linear_y=self.linear_speed)
                     print('↗ right forward')
-                elif key in ('z', 'Z'):
+                elif key in ('y', 'Y'):
                     self.publish_twist(
                         linear_x=self.linear_speed,
                         linear_y=-self.linear_speed)
