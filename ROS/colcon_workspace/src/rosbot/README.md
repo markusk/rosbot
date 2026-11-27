@@ -82,7 +82,7 @@ Keyboard control for the robot.
 
 **Keys:**
 - W/A/S/D: forward/left/backward/right
-- Q/E/Z/C: diagonal movement
+- Q/E/Y/C: diagonal movement (German QWERTZ layout)
 - J/L: rotate left/right
 - +/-: increase/decrease speed
 - SPACE: stop
