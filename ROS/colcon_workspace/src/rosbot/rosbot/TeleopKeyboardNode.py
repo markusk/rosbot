@@ -101,10 +101,10 @@ class TeleopKeyboardNode(Node):
 
                 # movement commands
                 if key in ('w', 'W'):
-                    self.publish_twist(linear_x=self.linear_speed)
+                    self.publish_twist(linear_x=-self.linear_speed)
                     print('↑ forward')
                 elif key in ('s', 'S'):
-                    self.publish_twist(linear_x=-self.linear_speed)
+                    self.publish_twist(linear_x=self.linear_speed)
                     print('↓ backward')
                 elif key in ('a', 'A'):
                     self.publish_twist(linear_y=self.linear_speed)
@@ -115,22 +115,22 @@ class TeleopKeyboardNode(Node):
                 # Diagonal movement
                 elif key in ('q', 'Q'):
                     self.publish_twist(
-                        linear_x=self.linear_speed,
+                        linear_x=-self.linear_speed,
                         linear_y=self.linear_speed)
                     print('↖ left forward')
                 elif key in ('e', 'E'):
                     self.publish_twist(
-                        linear_x=self.linear_speed,
+                        linear_x=-self.linear_speed,
                         linear_y=-self.linear_speed)
                     print('↗ right forward')
                 elif key in ('z', 'Z'):
                     self.publish_twist(
-                        linear_x=-self.linear_speed,
+                        linear_x=self.linear_speed,
                         linear_y=self.linear_speed)
                     print('↙ left backward')
                 elif key in ('c', 'C'):
                     self.publish_twist(
-                        linear_x=-self.linear_speed,
+                        linear_x=self.linear_speed,
                         linear_y=-self.linear_speed)
                     print('↘ right backward')
                 # Rotation
